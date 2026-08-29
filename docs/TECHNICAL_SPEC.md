@@ -339,17 +339,81 @@ Do not make forfeits part of the scoring system.
 
 ---
 
-## 13. Answer Visibility
+## 13. Display Architecture
 
-The application uses a single interface — there is no separate public view and GM view.
+The application uses a **dual-display system** via a split-screen layout (or separate window mode):
 
-The canonical answer must not be rendered anywhere in the interface before the answer-reveal stage. Don't rely solely on CSS to hide it (e.g. `display: none`) — omit it from rendered output entirely until the reveal action fires.
+### Public Display (Left/External)
+- Optimized for 1080p TV/projector viewing from several meters away
+- Minimal controls — read-only presentation of game state
+- Shows:
+  - Title: "⚔️ BACHELOR QUEST ⚔️" with gradient text effect
+  - Current team identity, score, and progress
+  - Encounter card (icon, type, point value) with color-coded border
+  - Question text in large serif font (52px minimum)
+  - Multiple-choice options (if applicable) with gold letter labels (A/B/C/D)
+  - Canonical answer (when revealed) with glowing gold animation
+  - Forfeit text (when active) with pulsing red animation
+  - Leaderboard status bar at bottom with all team tokens, scores, and progress
+  - Dramatic emoji-based theming throughout
 
-Everything else (question metadata, scoring controls, game controls, node values, etc.) is visible at all times; the answer is the only piece of state that is ever withheld.
+### GM Control Interface (Right/Laptop)
+- Comprehensive controls for game progression
+- Shows same game state as public display but adds controls:
+  - Node selection buttons for available moves
+  - "📢 Reveal Answer" button to trigger answer display on public display
+  - "✓ Correct" and "✗ Incorrect" buttons to resolve the answer
+  - "🎭 Forfeit Complete" button to advance after forfeit is performed
+  - "↶ Undo" button for the previous action
+  - Current team details, leaderboard, and game statistics
+  - Blurred answer preview (opacity 0.3, blur 3px) until reveal is triggered
+
+### Answer Security Model
+
+**The canonical answer is never visible on the public display before the GM authorizes it.**
+
+- **Before ANSWER_REVEAL**: Answer is not rendered in any component
+- **During ANSWER_REVEAL (before reveal)**: Public display shows "⏳ AWAITING REVELATION ⏳" message
+- **After GM clicks reveal**: Answer displays prominently with glowing animation
+- **GM Interface**: Answer is always visible to GM (visually dimmed before reveal, clear after)
+
+The single source of truth for answer visibility is `gameState.isAnswerRevealed` boolean.
+
+All other game state (questions, node values, team scores, encounter types, etc.) is visible in both displays at all times.
 
 ---
 
-## 14. Persistence
+## 14. Display Styling
+
+The public display uses inline React styles for component encapsulation:
+
+### Visual Theme
+- **Background**: Gradient linear-gradient(135deg, #0a0e27 0%, #1a1a3e 40%, #2d1b3e 100%) (dark blue to purple)
+- **Primary Font**: "Cinzel", "Georgia", serif (fantasy/medieval aesthetic)
+- **Primary Color**: Cyan #64c8ff
+- **Accent Color**: Gold #ffd700
+- **Danger Color**: Red #ff6464
+- **Glow Color**: Theme-specific (matches encounter type)
+
+### Animations
+- **pulse**: Opacity toggle (2s infinite) for waiting states and forfeit display
+- **glow**: Box-shadow pulsing (2s infinite) for answer reveal box
+- **scoreFlash**: Scale+color flash (1.5s) triggered on score updates
+
+### Readable from Distance
+Minimum font sizes for TV viewing:
+- Title: 72px
+- Team name: 54px
+- Current score display: 48px
+- Question text: 52px
+- Encounter label: 36px
+- Status bar text: 22-26px
+
+Encounter cards use 80px emoji icons with drop-shadow filters for visibility.
+
+---
+
+## 15. Persistence
 
 Use local browser persistence if practical.
 
@@ -361,7 +425,7 @@ Do not introduce a backend.
 
 ---
 
-## 15. Reliability
+## 16. Reliability
 
 Prevent:
 
@@ -378,7 +442,7 @@ The game should fail gracefully when content is missing or malformed.
 
 ---
 
-## 16. Configuration
+## 17. Configuration
 
 Centralize configurable values such as:
 
@@ -393,7 +457,7 @@ Do not scatter these values throughout the UI code.
 
 ---
 
-## 17. Presentation
+## 18. Presentation
 
 A persistent scoreboard bar is always visible at the bottom of the screen, showing every team's name and current score, evenly spaced across its width. It updates immediately on every score change and does not depend on game phase.
 

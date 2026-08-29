@@ -207,7 +207,42 @@ Do not rely on external image URLs because the game must work offline.
 
 ---
 
-## 9. Question Quality
+## 9. Visual Presentation
+
+The game presents questions within a fantasy roguelike aesthetic on the public display.
+
+### How Questions Appear
+
+- **Question text** is displayed at 52px serif font ("Cinzel", "Georgia") on a gradient dark blue-to-purple background
+- **Multiple choice options** are shown as 4 lettered gold cards (A, B, C, D) with a 36px font size, arranged in a 2×2 grid
+- **Images** are displayed as the question, scaled to fit while maintaining aspect ratio, with a decorative cyan border and glow effect
+- **Answer reveal** shows the canonical answer in a large gold-glowing box with the heading "✨ THE ANSWER ✨", plus an optional explanation below in smaller italic text
+
+### Question Formatting Tips
+
+- Keep question text **concise and readable at 52px**: avoid very long wording
+- For **multiple-choice**, write clear, distinct options that fit comfortably as card labels (30-40 characters each)
+- For **image-based questions**, ensure the image is clear and unambiguous when viewed on a 1080p display from several meters away
+- For **explanations**, keep them short (1–2 sentences) and accessible to your group; they appear after the answer reveal
+
+### Matching Encounter Types to Questions
+
+Encounter types are automatically assigned by the game based on map nodes, and questions are randomly selected to match each encounter's difficulty:
+
+| Encounter | Difficulty | Card Color | Theme | Best Question Types |
+|-----------|-----------|-----------|-------|-------------------|
+| TREASURE 💎 | 2 (easy) | Gold | Straightforward | General knowledge, groom facts |
+| BATTLE ⚔️ | 3 (medium) | Red | Combat-themed | Mixed knowledge, predictions |
+| PUZZLE 🧩 | 4 (hard) | Cyan | Problem-solving | Logic, wordplay, trivia |
+| MYSTERY 🔮 | 3 (medium) | Purple | Enigmatic | **Prefer image questions** |
+| ELITE 👑 | 5 (very hard) | Orange | Authoritative | Deep nerd knowledge, obscure |
+| FINAL BOSS 🐉 | 5 (very hard) | Red | Epic | The hardest, most dramatic question |
+
+The game automatically ensures variety by avoiding repeating a team's previous question category within a single game.
+
+---
+
+## 10. Question Quality
 
 Prefer questions that are:
 

@@ -53,8 +53,6 @@ export const ENCOUNTER_LABEL: Record<EncounterType, string> = {
   FINAL_BOSS: 'Final Boss',
 };
 
-export const START_ICON = '\u{1F6A9}'; // triangular flag
-
 export const TEAM_ICONS = ['\u{1F6E1}️', '\u{1F5E1}️', '\u{1F3F9}', '\u{1F52E}'];
 
 // By index (matching the default Red/Blue/Green/Yellow team names, but

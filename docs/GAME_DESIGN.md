@@ -2,7 +2,7 @@
 
 ## 1. Concept
 
-A competitive quiz presented as a branching fantasy-adventure map.
+A competitive quiz presented as a branching fantasy-adventure map with a polished indie roguelike aesthetic.
 
 The game combines:
 - quiz questions
@@ -11,9 +11,20 @@ The game combines:
 - randomized questions
 - forfeits for incorrect answers
 
-The presentation should feel like a polished indie fantasy video game inspired by branching adventure maps such as Slay the Spire.
+### Display Architecture
 
-Do not copy Slay the Spire artwork, UI, characters, or assets.
+The game uses a **dual-display system**:
+
+- **Public Display** (1080p TV/Projector): Fantasy-themed presentation optimized for viewing from several meters away. Shows current team, encounter type, question, answer reveal (when authorized), forfeit, and leaderboard.
+- **GM Control Interface** (Laptop): Comprehensive control panel for game progression, answer validation, node selection, and game management.
+
+The public display features:
+- Gradient dark blue-to-purple background
+- Serif "Cinzel" font for fantasy aesthetic
+- Emoji-based icons (🗡️ 🏹 🛡️ 🔥) for teams and (💎 ⚔️ 🧩 🔮 👑 🐉) for encounter types
+- Glowing and pulsing animations for dramatic answer reveals and forfeits
+- Large, readable typography (52-72px minimum) for TV viewing distance
+- Color-coded encounter cards matching encounter type themes
 
 The game is fundamentally a quiz, not an RPG.
 
@@ -21,12 +32,19 @@ The game is fundamentally a quiz, not an RPG.
 
 ## 2. Teams
 
-- 3–4 teams
-- Teams are configured before the game
-- Each team has a name and icon
+- 3–4 teams (configurable at setup)
+- Teams are configured before the game starts
+- Each team has:
+  - Name (user-provided)
+  - Icon/Token (auto-assigned emoji: 🗡️ 🏹 🛡️ 🔥)
+  - Score (starts at 0)
+  - Position on map
+  - Encounters completed counter (0/10)
 - Every team starts at 0 points
 - Scores may become negative
 - There is no minimum score
+
+Both the public display and GM interface prominently show current team identity, score, and progress.
 
 ---
 
@@ -45,29 +63,50 @@ Therefore every team answers exactly 10 questions.
 
 ## 4. Turn Flow
 
-Teams play in a fixed turn order.
+Teams play in a fixed turn order. Each phase is visually distinct on the public display.
 
-On a team's turn:
+### Phase: TURN_START
+GM selects the next node for the current team.
+- Public Display: Shows current team with "✨ Team Selecting Path ✨" message
+- GM Interface: Displays available connected nodes with encounter type and point value
 
-1. Show its current map position.
-2. Show the valid connected nodes.
-3. Team chooses one node.
-4. Reveal the node's encounter type and point value.
-5. Select an eligible unused question.
-6. Display the question.
-7. The team discusses and gives its answer.
-8. The game master reveals the canonical answer.
-9. The game master marks the answer correct or incorrect.
-10. Correct: add the node value.
-11. Incorrect: subtract the node value and show a forfeit. The game master clicks **Forfeit Complete** once it has been performed.
-12. Move the team to the selected node.
-13. End the turn.
+### Phase: QUESTION_DISPLAY
+Question is presented to the team for discussion.
+- Public Display: Shows the question text (52px font), and if applicable, multiple-choice options (A/B/C/D) or images
+- GM Interface: Shows question and canonical answer (blurred until reveal)
+- Team discusses and provides an answer verbally
 
-A team **always advances**, regardless of the result.
+### Phase: ANSWER_REVEAL
+GM reviews the team's answer.
+- Public Display: Shows "⏳ AWAITING REVELATION ⏳" until GM triggers reveal, then displays the canonical answer in glowing gold box with "✨ THE ANSWER ✨" heading and optional explanation
+- GM Interface: Answer becomes clear (unblurred), GM clicks "✓ Correct" or "✗ Incorrect"
 
-An incorrect answer never prevents progression.
+### Phase: FORFEIT_DISPLAY (if incorrect)
+Team performs the forfeit.
+- Public Display: Displays forfeit text in pulsing red box with "🎭 FORFEIT 🎭" heading
+- GM Interface: "Forfeit Complete" button to advance after forfeit is performed
+- Scoring automatically applied: score ± node value
+- Team progresses to selected node
 
-There is no time limit on any step. The game master paces discussion, answering, and reveal manually.
+### Turn Completion
+- Score updates with animation (scoreFlash)
+- Leaderboard updates
+- Next turn begins
+
+A team **always advances**, regardless of correctness.
+
+An incorrect answer never prevents progression — the team still moves to the selected node.
+
+There is no time limit on any step. The game master controls the pacing by manually advancing through each phase.
+
+### Answer Security
+
+The canonical answer is **never visible on the public display before the GM authorizes it**. This prevents spoiling for the audience:
+- During QUESTION_DISPLAY: answer is not rendered anywhere
+- During ANSWER_REVEAL: answer is hidden with "⏳ AWAITING REVELATION ⏳" message until GM clicks "📢 Reveal Answer"
+- After reveal: answer displays prominently with glowing animation
+
+The GM interface always shows the answer for reference, but it is visually dimmed/blurred before the reveal action, becoming clear after.
 
 ---
 
@@ -105,35 +144,47 @@ They do not see the question.
 
 Difficulty follows the same 1–5 scale used for questions (see CONTENT_GUIDE.md §3): 1 = very easy, 2 = easy, 3 = medium, 4 = hard, 5 = very hard.
 
-### TREASURE
+### TREASURE 💎 (Gold)
 Easy question. **Difficulty 2.**
 
 **±200 points**
 
-### BATTLE
+Public Display: Golden icon with gold accent color
+
+### BATTLE ⚔️ (Red)
 Medium question. **Difficulty 3.**
 
 **±400 points**
 
-### PUZZLE
+Public Display: Sword icon with red accent color
+
+### PUZZLE 🧩 (Cyan)
 Hard question. **Difficulty 4.**
 
 **±600 points**
 
-### MYSTERY
+Public Display: Puzzle piece icon with cyan accent color
+
+### MYSTERY 🔮 (Purple)
 Medium question with a less predictable category or format. **Difficulty 3.** Prefers an image-based question with accompanying question text over a plain text question, when one is available.
 
 **±400 points**
 
-### ELITE
+Public Display: Crystal ball icon with purple accent color
+
+### ELITE 👑 (Orange)
 Very hard question. **Difficulty 5.**
 
 **±800 points**
 
-### FINAL BOSS
-Special final question at the hardest tier. **Difficulty 5.**
+Public Display: Crown icon with orange accent color
+
+### FINAL BOSS 🐉 (Bright Red)
+Special final encounter at the hardest tier. **Difficulty 5.**
 
 **±1000 points**
+
+Public Display: Dragon icon with bright red accent color, emphasizing the climactic nature
 
 Difficulty 1 (very easy) is not directly targeted by any encounter type. It exists as an extra buffer/fallback tier for the question-selection system (see §9).
 
@@ -407,7 +458,6 @@ The game master drives the game forward from the same shared interface. Availabl
 - correct/incorrect selection
 - forfeit-complete confirmation (a single control clicked once the forfeit has been performed)
 - turn advancement
-- leaderboard display
 - undo (reverts only the single most recently completed action — there is no multi-step undo, and once another action occurs, the undone action can no longer be recovered)
 
 No pause or reset control is needed.
