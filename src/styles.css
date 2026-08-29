@@ -1,0 +1,1520 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Nearly all sizing in this stylesheet (padding, gaps, font-size) is in rem,
+   so scaling the root font-size scales the whole HTML-based UI - header,
+   scoreboard, legend, node-select panel, overlays - together as one unit.
+   This is what makes the game legible when the browser window itself is
+   much larger (a shared/projected screen) rather than a normal laptop
+   window; the SVG map content scales separately via its own measured
+   container size (see MapView.tsx's ResizeObserver), since viewBox units
+   aren't affected by root font-size at all. clamp() keeps it at the normal
+   16px on typical windows and scales up smoothly on larger ones. */
+html {
+  font-size: clamp(16px, 0.85vw + 0.55vh, 26px);
+}
+
+:root {
+  --ink: #f1e9d8;
+  --ink-dim: #b9b3a4;
+  --gold: #f4c669;
+  --gold-dim: #d99b3f;
+  --panel: #1c1e29;
+  --panel-edge: #4a4536;
+  --bg-deep: #0a0b11;
+  --good: #6fe0a0;
+  --bad: #ff8080;
+  --glyph-ink: #2a1f12;
+
+  /* The map area is its own light "game world" panel inside the otherwise
+     dark UI chrome (header/scoreboard) - see .map-frame. */
+  --parchment: #d9c9a0;
+  --parchment-edge: #6b4f28;
+  --gold-ink: #8a5a12;
+
+  --c-treasure: #d9a63f;
+  --c-battle: #b3432f;
+  --c-puzzle: #3f6fb3;
+  --c-mystery: #7a4fb3;
+  --c-elite: #b33f8f;
+  --c-boss: #8a1414;
+  --c-start: #3a6b52;
+
+  /* Light/dark variants feed the node radial gradients (a lit-orb bevel
+     instead of a flat fill) - see MapView.tsx's <radialGradient> defs. */
+  --c-treasure-light: color-mix(in srgb, var(--c-treasure) 55%, white);
+  --c-treasure-dark: color-mix(in srgb, var(--c-treasure) 65%, black);
+  --c-battle-light: color-mix(in srgb, var(--c-battle) 55%, white);
+  --c-battle-dark: color-mix(in srgb, var(--c-battle) 65%, black);
+  --c-puzzle-light: color-mix(in srgb, var(--c-puzzle) 55%, white);
+  --c-puzzle-dark: color-mix(in srgb, var(--c-puzzle) 65%, black);
+  --c-mystery-light: color-mix(in srgb, var(--c-mystery) 55%, white);
+  --c-mystery-dark: color-mix(in srgb, var(--c-mystery) 65%, black);
+  --c-elite-light: color-mix(in srgb, var(--c-elite) 55%, white);
+  --c-elite-dark: color-mix(in srgb, var(--c-elite) 65%, black);
+  --c-boss-light: color-mix(in srgb, var(--c-boss) 55%, white);
+  --c-boss-dark: color-mix(in srgb, var(--c-boss) 65%, black);
+  --c-start-light: color-mix(in srgb, var(--c-start) 55%, white);
+  --c-start-dark: color-mix(in srgb, var(--c-start) 65%, black);
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 15%, rgba(122, 79, 179, 0.12), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 80%, rgba(179, 63, 143, 0.1), transparent 60%),
+    radial-gradient(circle at top, #1e2130 0%, var(--bg-deep) 70%);
+  color: var(--ink);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+h1,
+h2 {
+  font-family: 'Cinzel', 'Trebuchet MS', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Chunky display serif for the header and node/encounter labels; body copy
+   (questions, team names people type in) stays in the more legible Georgia
+   serif set on <body> - Cinzel runs wider and isn't safe for arbitrary-length
+   user text like team names. */
+.overlay-header,
+.node-select-prompt,
+.leaderboard-title,
+.node-choice-label,
+.winner-announcement {
+  font-family: 'Cinzel', 'Trebuchet MS', Georgia, serif;
+  font-weight: 600;
+}
+
+/* ---------- Setup screen ---------- */
+
+/* Full-bleed parchment behind the card, same technique as the map's
+   .map-frame (a base color, a soft vignette + stains, a tiled grain
+   texture) - so this doesn't read as a separate plain app before the "real"
+   game starts. */
+.setup-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  background: var(--parchment);
+  overflow: hidden;
+}
+
+.setup-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 32% at 16% 82%, rgba(107, 79, 40, 0.15), transparent 65%),
+    radial-gradient(ellipse 40% 30% at 84% 16%, rgba(107, 79, 40, 0.13), transparent 60%),
+    radial-gradient(ellipse 85% 85% at 50% 50%, transparent 42%, rgba(58, 42, 20, 0.4) 100%);
+}
+
+.setup-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.035' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 260px 260px;
+  opacity: 0.2;
+  mix-blend-mode: multiply;
+}
+
+/* The card itself stays dark - like a bound tome sitting open on the
+   parchment table - which is what lets the title keep its existing
+   gold-on-dark styling untouched instead of needing a different color to
+   stay legible against a light background. Same carved-ring border
+   technique the map frame used earlier. */
+.setup-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2.75rem 3rem;
+  max-width: 640px;
+  width: 100%;
+  background: radial-gradient(ellipse at 50% 0%, #23263a, var(--bg-deep) 75%);
+  border-radius: 14px;
+  border: 3px solid #17140c;
+  box-shadow: 0 0 0 3px #5c4d28, 0 0 0 5px #100f16, 0 0 0 8px #7a6636, 0 12px 34px rgba(0, 0, 0, 0.55),
+    inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.setup-screen h1 {
+  font-size: 2.6rem;
+  margin: 0;
+  color: var(--gold);
+  text-shadow: 0 0 24px rgba(244, 198, 105, 0.35);
+}
+
+.subtitle {
+  color: var(--ink-dim);
+  margin: 0;
+  font-style: italic;
+}
+
+.team-count-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.team-count-label {
+  font-size: 0.9rem;
+  color: #d9d2c2;
+}
+
+.team-count-buttons {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.team-count-button {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 8px;
+  border: 2px solid var(--panel-edge);
+  background: var(--panel);
+  color: var(--ink-dim);
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.team-count-button:hover {
+  border-color: var(--gold-dim);
+}
+
+.team-count-button.active {
+  background: linear-gradient(160deg, #efe2bd, #d9c9a0);
+  border-color: var(--gold);
+  color: var(--glyph-ink);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+.team-name-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  max-width: 640px;
+}
+
+.team-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #d9d2c2;
+}
+
+/* Parchment/ink instead of a plain dark rectangle - carved into the card
+   via an inset shadow rather than sitting flush on top of it. */
+.team-name-field input {
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  border: 2px solid var(--parchment-edge);
+  background: linear-gradient(160deg, #efe2bd, #d9c9a0);
+  color: var(--glyph-ink);
+  min-width: 180px;
+  font-family: Georgia, serif;
+  box-shadow: inset 0 2px 4px rgba(90, 66, 34, 0.35), inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.team-name-field input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+/* Same parchment-card, color-outlined language as the map's path-selection
+   buttons, not the gold gradient .primary-button used for in-game actions
+   (Reveal Answer, Continue) - this keeps the two visual languages distinct:
+   one is "the button style for the map's world," the other is "the generic
+   action button," and Start Game belongs with the former. */
+.setup-start-button {
+  padding: 0.85rem 2.2rem;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #efe2bd, #d9c9a0);
+  border: 2px solid var(--gold);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.55), inset 0 -3px 5px rgba(90, 66, 34, 0.22),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+  color: var(--glyph-ink);
+  font-weight: 700;
+  font-size: 1.1rem;
+  font-family: 'Cinzel', 'Trebuchet MS', Georgia, serif;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.setup-start-button:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(90, 66, 34, 0.26),
+    0 6px 14px rgba(0, 0, 0, 0.5);
+}
+
+.primary-button {
+  padding: 0.7rem 1.6rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #241a08;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.primary-button:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.ghost-button {
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: rgba(244, 198, 105, 0.08);
+  color: var(--gold);
+  border: 1px solid rgba(244, 198, 105, 0.4);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ghost-button:hover {
+  background: rgba(244, 198, 105, 0.18);
+}
+
+.error-text {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+.action-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin: 0.5rem 1rem 0;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  background: rgba(122, 47, 47, 0.25);
+  border: 1px solid var(--bad);
+  color: var(--bad);
+  font-weight: 600;
+  text-align: center;
+}
+
+.overlay-error {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(122, 47, 47, 0.25);
+  border: 1px solid var(--bad);
+  color: var(--bad);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---------- Game screen ---------- */
+
+/* One continuous background for the whole screen instead of a separate dark
+   page + a boxed parchment panel: dark at the very top/bottom, fading into
+   parchment in the middle. The header and scoreboard sit on transparent-ish
+   backgrounds (below) so this single gradient is what actually blends the
+   "dark UI chrome" into the "light game world" - there's no seam to hide
+   because there's no second, separately-colored box underneath them. */
+.game-screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* Only the top fade lives here now - the bottom transition is owned
+     entirely by .scoreboard's own gradient below. Splitting it that way
+     means the fade always lines up with the scoreboard's actual rendered
+     height (which can vary - more teams, wrapped names) instead of a
+     second guess at pixel offsets baked in here that could drift out of
+     alignment with it. */
+  background: linear-gradient(to bottom, var(--bg-deep) 0, var(--bg-deep) 60px, var(--parchment) 150px, var(--parchment) 100%);
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.25rem;
+  /* Translucent, not opaque - a little of the shared gradient shows through
+     even here, which is what keeps this from reading as a solid bar dropped
+     on top of a separate panel. Not fully transparent because header height
+     can vary slightly and this still needs to guarantee text contrast. */
+  background: rgba(8, 9, 14, 0.82);
+}
+
+.game-header h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  color: var(--gold);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.undo-button {
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: #2a2c3c;
+  color: #d9d2c2;
+  border: 1px solid var(--panel-edge);
+  font-size: 0.85rem;
+}
+
+.undo-button:hover {
+  background: #363850;
+}
+
+.undo-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #2a2c3c;
+}
+
+.map-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Edge-to-edge, no side gutter - full-bleed. The bottom padding is still
+     reserved space for the node-select panel; the SVG's own internal margin
+     (PAD_X in MapView.tsx) keeps nodes off the literal viewport edge. */
+  padding: 0.5rem 0 11.5rem;
+}
+
+.map-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* No panel background of its own - the parchment color comes from the
+     shared .game-screen gradient showing through underneath. This is just
+     the texture/vignette overlay on top of that shared base. */
+}
+
+/* A few soft, irregular age-stain blotches plus a warm vignette darkening
+   toward the edges - like a worn map corner, not a hard rectangle edge.
+   Sits under the svg (z-index 1) via the stacking order below. */
+.map-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 35% 40% at 12% 80%, rgba(107, 79, 40, 0.14), transparent 65%),
+    radial-gradient(ellipse 28% 35% at 88% 18%, rgba(107, 79, 40, 0.12), transparent 60%),
+    radial-gradient(ellipse 25% 30% at 60% 95%, rgba(90, 66, 34, 0.08), transparent 60%),
+    radial-gradient(ellipse 70% 90% at 50% 50%, transparent 45%, rgba(58, 42, 20, 0.35) 100%);
+}
+
+/* Tileable fiber/grain texture (an SVG noise filter baked into a data URI,
+   no image asset needed) multiplied over the parchment so it reads as paper
+   rather than a flat color fill. */
+.map-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.035' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 260px 260px;
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+}
+
+.map-view {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
+
+
+.map-path {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke 0.3s ease, opacity 0.3s ease;
+  filter: url(#rough-path);
+}
+
+/* Thin, dashed, no glow - the baseline network reads as a faint map of
+   possibility, not a lit route, so the currently-selectable glow (below)
+   stands out instead of competing with dozens of equally-bright lines. */
+.map-path-dormant {
+  stroke: #34301f;
+  stroke-width: 1.4;
+  stroke-dasharray: 0.035 0.03;
+  opacity: 0.5;
+}
+
+.map-path-walked {
+  /* Fallback only - MapView.tsx sets stroke inline per team (var(--gold)
+     itself is close in hue to the parchment and would wash out anyway, same
+     issue the earlier bronze fallback here was fixing before per-team
+     coloring existed). Inline style wins the cascade over this. */
+  stroke: rgba(138, 90, 18, 0.55);
+  stroke-width: 3.2;
+  /* pathLength=1 on the <path> normalizes dasharray/dashoffset to 0-1
+     regardless of the curve's actual geometric length, so this "draws on"
+     the route the moment it's chosen instead of snapping to lit instantly. */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: path-draw-on 0.7s ease-out;
+}
+
+@keyframes path-draw-on {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Blur-glow reads as a bright halo on dark backdrops but just looks washed
+   out on light parchment, so the selectable-path highlight is a solid ink
+   stroke plus a tight, un-blurred drop shadow (like raised/inked linework)
+   instead of a diffuse glow. */
+.map-path-next {
+  stroke: var(--gold-ink);
+  stroke-width: 4.5;
+  filter: drop-shadow(0 1.5px 1.5px rgba(40, 25, 5, 0.5));
+}
+
+.node-circle {
+  /* stroke-width comes from the radius-proportional inline attribute in
+     MapView.tsx, not a flat value here - otherwise it'd look thin on the
+     boss node and thick on start instead of scaling with size. */
+  stroke: var(--glyph-ink);
+  filter: drop-shadow(0 4px 6px rgba(40, 28, 10, 0.35)) drop-shadow(0 1.5px 2px rgba(40, 28, 10, 0.3));
+}
+
+.node-rim-shadow {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.node-rim-light {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* Toned down from a glossy sphere highlight to a faint hint of dimension -
+   a strong specular blob reads as a glass/gem render, not a stamped medallion
+   sitting on parchment. */
+.node-specular {
+  fill: rgba(255, 255, 255, 0.18);
+  filter: blur(1.5px);
+  pointer-events: none;
+}
+
+.node-START {
+  fill: url(#grad-start);
+}
+.node-TREASURE {
+  fill: url(#grad-treasure);
+}
+.node-BATTLE {
+  fill: url(#grad-battle);
+}
+.node-PUZZLE {
+  fill: url(#grad-puzzle);
+}
+.node-MYSTERY {
+  fill: url(#grad-mystery);
+}
+.node-ELITE {
+  fill: url(#grad-elite);
+}
+.node-FINAL_BOSS {
+  fill: url(#grad-boss);
+  stroke: var(--gold-ink);
+  stroke-width: 4;
+}
+
+.node-icon-plate {
+  fill: var(--ink);
+  opacity: 0.92;
+  stroke: rgba(0, 0, 0, 0.35);
+}
+
+.node-glyph {
+  fill: var(--glyph-ink);
+}
+
+/* Small corner flourishes for a bounded card that wants to feel carved
+   rather than plain-cornered - used on .setup-card. */
+.frame-ornament {
+  position: absolute;
+  z-index: 3;
+  font-size: 1.2rem;
+  color: var(--gold-dim);
+  opacity: 0.7;
+  text-shadow: 0 0 6px rgba(244, 198, 105, 0.45);
+  pointer-events: none;
+}
+.frame-ornament.corner-tl {
+  top: 10px;
+  left: 12px;
+}
+.frame-ornament.corner-tr {
+  top: 10px;
+  right: 12px;
+}
+.frame-ornament.corner-bl {
+  bottom: 10px;
+  left: 12px;
+}
+.frame-ornament.corner-br {
+  bottom: 10px;
+  right: 12px;
+}
+
+.map-legend {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 4;
+}
+
+.map-legend-panel {
+  background: rgba(12, 13, 20, 0.85);
+  border: 1px solid var(--panel-edge);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  animation: overlay-fade-in 0.15s ease;
+}
+
+.map-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.02rem;
+  color: var(--ink);
+  font-family: 'Cinzel', 'Trebuchet MS', Georgia, serif;
+  white-space: nowrap;
+}
+
+.map-legend-value {
+  color: var(--ink-dim);
+  font-size: 0.8em;
+}
+
+.map-legend-icon {
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-shrink: 0;
+}
+
+.map-node {
+  transition: opacity 0.3s ease;
+}
+
+/* Dormant = still reachable from the current team's position, just not
+   chosen yet - the whole future tree shape needs to stay readable, so this
+   is only a mild recede, not a fog-of-war dim. */
+.map-node.node-dormant {
+  opacity: 0.92;
+}
+
+.map-node.node-dormant .node-circle {
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.6)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45)) saturate(0.85)
+    brightness(0.92);
+}
+
+/* Locked = a sibling branch the current team already passed by and can
+   never reach now - this is the only case that gets the heavy dim. */
+.map-node.node-locked {
+  opacity: 0.4;
+}
+
+.map-node.node-locked .node-circle {
+  filter: grayscale(0.75) brightness(0.7);
+}
+
+.map-node.node-available .node-circle {
+  animation: node-glow-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes node-glow-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(244, 198, 105, 0.55)) brightness(1.05);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(244, 198, 105, 0.85)) brightness(1.12);
+  }
+}
+
+.map-node.node-visited .node-circle {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6)) saturate(0.55) brightness(0.8);
+}
+
+.node-visited-badge circle {
+  fill: var(--good);
+  stroke: var(--bg-deep);
+  stroke-width: 2;
+}
+
+.node-visited-badge text {
+  fill: #06210f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.node-pulse-ring {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3;
+  opacity: 0.8;
+  animation: pulse-ring 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+
+.node-boss-aura {
+  fill: none;
+  stroke: var(--c-boss);
+  stroke-width: 6;
+  opacity: 0.55;
+  animation: boss-aura 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes boss-aura {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+}
+
+.team-token {
+  transition: transform 0.6s ease;
+}
+
+.team-token-circle {
+  /* stroke-width is a radius-proportional inline attribute in MapView.tsx
+     (tokens have two discrete sizes - normal and the crowded/shared-node
+     case - and a flat value here would only look right on one of them). */
+  fill: #1c1e29;
+  stroke: var(--gold);
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
+}
+
+.team-token-glow {
+  fill: none;
+  stroke: var(--gold);
+  opacity: 0.6;
+  animation: token-glow 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes token-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
+}
+
+.node-select-panel {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+}
+
+.node-select-prompt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  background: rgba(12, 13, 20, 0.72);
+  border: 1px solid var(--panel-edge);
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.node-select-team {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.node-select-progress {
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+}
+
+.node-select-panel.boss-turn .node-select-prompt {
+  border-color: var(--c-boss);
+  color: var(--gold);
+  animation: boss-turn-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes boss-turn-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(138, 20, 20, 0);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(138, 20, 20, 0.65);
+  }
+}
+
+.node-choices {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Parchment card, not a dark Material-style tile - this sits directly under
+   the map, so it needs to read as part of the same world instead of generic
+   app chrome. The per-type border color and the medallion icon (below) tie
+   each button back to its actual node on the map. */
+.node-choice-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #efe2bd, #d9c9a0);
+  border: 2px solid var(--parchment-edge);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.55), inset 0 -3px 5px rgba(90, 66, 34, 0.22),
+    0 3px 6px rgba(0, 0, 0, 0.4);
+  color: var(--glyph-ink);
+  min-width: 110px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.node-choice-button:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6), inset 0 -3px 5px rgba(90, 66, 34, 0.26),
+    0 5px 11px rgba(0, 0, 0, 0.5);
+}
+
+.node-choice-TREASURE {
+  border-color: var(--c-treasure);
+}
+.node-choice-BATTLE {
+  border-color: var(--c-battle);
+}
+.node-choice-PUZZLE {
+  border-color: var(--c-puzzle);
+}
+.node-choice-MYSTERY {
+  border-color: var(--c-mystery);
+}
+.node-choice-ELITE {
+  border-color: var(--c-elite);
+}
+.node-choice-FINAL_BOSS {
+  border-color: var(--c-boss);
+}
+
+.node-choice-icon {
+  width: 2.52rem;
+  height: 2.52rem;
+}
+
+.node-choice-label {
+  font-size: 1.2rem;
+}
+
+.node-choice-icon-fill {
+  stroke: var(--glyph-ink);
+  stroke-width: 1.5;
+}
+.node-choice-icon-TREASURE {
+  fill: var(--c-treasure);
+}
+.node-choice-icon-BATTLE {
+  fill: var(--c-battle);
+}
+.node-choice-icon-PUZZLE {
+  fill: var(--c-puzzle);
+}
+.node-choice-icon-MYSTERY {
+  fill: var(--c-mystery);
+}
+.node-choice-icon-ELITE {
+  fill: var(--c-elite);
+}
+.node-choice-icon-FINAL_BOSS {
+  fill: var(--c-boss);
+}
+
+.node-choice-value {
+  font-size: 0.96rem;
+  color: rgba(42, 31, 18, 0.72);
+}
+
+/* ---------- Scoreboard (Jeopardy-style bottom bar) ---------- */
+
+.scoreboard {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 1.5rem 1rem 0.9rem;
+  /* Its own local fade rather than a flat tint - the shared .game-screen
+     gradient stays parchment all the way down now, so this is what actually
+     dissolves the parchment into the dark control bar. A flat translucent
+     color here (the previous approach) only blended smoothly where it
+     happened to overlap the header's short fade zone; the scoreboard is
+     taller and sits past where that zone ended, so it just showed up as a
+     flat-edged box - hence the hard line. */
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(8, 9, 14, 0.5) 30%,
+    rgba(8, 9, 14, 0.88) 65%,
+    rgba(8, 9, 14, 0.95) 100%
+  );
+}
+
+.scoreboard-team {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  /* Size to content instead of force-stretching to an equal, capped width -
+     that's what was truncating longer team names once scores hit 3 digits. */
+  flex: 0 1 auto;
+  transition: box-shadow 0.3s ease;
+}
+
+.scoreboard-team.active {
+  background: rgba(244, 198, 105, 0.15);
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.scoreboard-crown {
+  font-size: 1rem;
+}
+
+.scoreboard-icon {
+  font-size: 1.2rem;
+}
+
+.scoreboard-name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.scoreboard-score {
+  font-weight: 800;
+  color: var(--good);
+  display: inline-block;
+  animation: score-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.scoreboard-score.negative {
+  color: var(--bad);
+}
+
+@keyframes score-pop {
+  0% {
+    transform: scale(1.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Question / forfeit overlay ---------- */
+
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 5, 9, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 10;
+  animation: overlay-fade-in 0.2s ease;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.boss-backdrop {
+  background: radial-gradient(ellipse at center, rgba(138, 20, 20, 0.35), rgba(4, 5, 9, 0.85) 70%);
+  animation: overlay-fade-in 0.2s ease, boss-backdrop-pulse 3s ease-in-out infinite;
+}
+
+@keyframes boss-backdrop-pulse {
+  0%,
+  100% {
+    background-color: rgba(4, 5, 9, 0);
+  }
+  50% {
+    background-color: rgba(138, 20, 20, 0.08);
+  }
+}
+
+.question-overlay {
+  background: var(--panel);
+  border: 2px solid var(--panel-edge);
+  border-top: 5px solid var(--gold-dim);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  animation: overlay-pop-in 0.25s ease;
+}
+
+.question-overlay.encounter-TREASURE {
+  border-top-color: var(--c-treasure);
+}
+.question-overlay.encounter-BATTLE {
+  border-top-color: var(--c-battle);
+}
+.question-overlay.encounter-PUZZLE {
+  border-top-color: var(--c-puzzle);
+}
+.question-overlay.encounter-MYSTERY {
+  border-top-color: var(--c-mystery);
+}
+.question-overlay.encounter-ELITE {
+  border-top-color: var(--c-elite);
+}
+
+.boss-overlay {
+  border-color: var(--c-boss);
+  border-top-color: var(--gold);
+  border-width: 2px;
+  border-top-width: 5px;
+  box-shadow: 0 0 50px rgba(138, 20, 20, 0.5), 0 0 0 1px rgba(244, 198, 105, 0.3);
+  animation: overlay-pop-in 0.25s ease, boss-shake 0.5s ease 0.1s;
+}
+
+@keyframes boss-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px) rotate(-0.3deg);
+  }
+  40% {
+    transform: translateX(5px) rotate(0.3deg);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes overlay-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.95rem;
+}
+
+.overlay-header-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The overlay sits at z-index 10 (see .overlay-backdrop), covering the game
+   header entirely - the undo button living only up there was unreachable
+   for exactly the moment it's most needed (right after marking an answer
+   correct/incorrect, before advancing away from it). This is a second entry
+   point to the same manager.undo(), not a separate undo history. */
+.overlay-undo-button {
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink-dim);
+  border: 1px solid var(--panel-edge);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  flex-shrink: 0;
+}
+
+.overlay-undo-button:hover {
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--ink);
+}
+
+.overlay-undo-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink-dim);
+}
+
+.overlay-icon {
+  font-size: 1.5rem;
+}
+
+.overlay-header-value {
+  color: var(--ink-dim);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.boss-overlay .overlay-header {
+  color: #ff9b9b;
+  font-size: 1.15rem;
+}
+
+.overlay-category {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.overlay-question {
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.35;
+}
+
+.overlay-image-frame {
+  padding: 6px;
+  background: #0c0d14;
+  border: 1px solid var(--panel-edge);
+  border-radius: 10px;
+}
+
+.overlay-image {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+}
+
+.overlay-choices {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #d9d2c2;
+}
+
+.reveal-button {
+  align-self: center;
+}
+
+.answer-block {
+  border-top: 1px solid var(--panel-edge);
+  padding-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.answer-reveal-in {
+  animation: answer-reveal 0.4s ease;
+}
+
+@keyframes answer-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.answer-reveal-label {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-dim);
+}
+
+.overlay-answer {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--good);
+  margin: 0;
+  text-shadow: 0 0 18px rgba(111, 224, 160, 0.35);
+}
+
+.overlay-explanation {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.resolution-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.correct-button,
+.incorrect-button {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: 8px;
+  font-weight: 700;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.correct-button:hover,
+.incorrect-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.correct-button {
+  background: #2f7a4f;
+  color: #eafff2;
+}
+
+.incorrect-button {
+  background: #7a2f2f;
+  color: #ffecec;
+}
+
+.result-block {
+  border-top: 1px solid var(--panel-edge);
+  padding-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  align-items: center;
+  text-align: center;
+}
+
+.result-stamp {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1.3rem;
+  border-radius: 10px;
+  border: 3px solid;
+  transform: rotate(-3deg);
+  animation: stamp-in 0.35s cubic-bezier(0.2, 1.4, 0.5, 1);
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-3deg) scale(1.8);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-3deg) scale(1);
+  }
+}
+
+.result-stamp-icon {
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.result-stamp-text {
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.result-block.correct .result-stamp {
+  border-color: var(--good);
+  color: var(--good);
+}
+
+.result-block.incorrect .result-stamp {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.result-score-change {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.forfeit-block {
+  background: #241a1a;
+  border: 2px dashed #7a2f2f;
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  width: 100%;
+  animation: forfeit-shake 0.4s ease 0.1s;
+}
+
+@keyframes forfeit-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+.forfeit-label {
+  margin: 0 0 0.3rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bad);
+}
+
+.forfeit-text {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ---------- Leaderboard ---------- */
+
+.leaderboard-overlay {
+  background: var(--panel);
+  border: 2px solid var(--gold-dim);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  max-width: 460px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  animation: overlay-pop-in 0.25s ease;
+}
+
+.leaderboard-title {
+  margin: 0;
+  color: var(--gold);
+  text-align: center;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  background: #14151f;
+  border: 1px solid var(--panel-edge);
+}
+
+.leaderboard-list li.leaderboard-leader {
+  border-color: var(--gold);
+  background: rgba(244, 198, 105, 0.1);
+}
+
+.leaderboard-rank {
+  font-weight: 800;
+  color: var(--ink-dim);
+  width: 1.4rem;
+}
+
+.leaderboard-icon {
+  font-size: 1.1rem;
+}
+
+.leaderboard-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 600;
+}
+
+.leaderboard-score {
+  font-weight: 800;
+  color: var(--good);
+}
+
+.leaderboard-score.negative {
+  color: var(--bad);
+}
+
+/* ---------- Results screen ---------- */
+
+.results-screen {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: 2rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.results-glow {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  width: 500px;
+  height: 500px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(244, 198, 105, 0.18), transparent 65%);
+  pointer-events: none;
+  animation: results-glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes results-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.results-eyebrow {
+  margin: 0;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.85rem;
+}
+
+.results-screen h1 {
+  color: var(--gold);
+  font-size: 2.2rem;
+  margin: 0;
+  text-shadow: 0 0 30px rgba(244, 198, 105, 0.4);
+}
+
+.winner-announcement {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.results-screen .leaderboard-list {
+  max-width: 420px;
+}
