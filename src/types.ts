@@ -24,7 +24,7 @@ export interface Team {
 
 export interface MapNode {
   id: string;
-  layer: number; // 0 = START, 1-9 = normal layers, 10 = BOSS
+  layer: number; // 0 = START, 1-9 = normal layers (9 is the terminal layer of every path)
   encounterType: EncounterType | null; // null only for START
   value: number;
   connections: string[]; // node ids this connects forward to
@@ -51,6 +51,17 @@ export interface Question {
   // alone just caps how far the pre-reveal excerpt runs.
   clipStart?: number;
   clipEnd?: number;
+  // Ties this question to one specific forfeit (its id in data/forfeits.json)
+  // for a wrong answer, instead of the usual weighted-random pick from the
+  // whole pool - e.g. a question about a song pairing with a forfeit that
+  // acts out that song. Every question without this keeps drawing randomly,
+  // same as always (CONTENT_GUIDE.md §11).
+  forfeitId?: string;
+  // Doubles the node's point value for this specific question - both ways
+  // (correct = +2x, incorrect = -2x). The stakes only become known once
+  // this question is actually drawn, after the team has already committed
+  // to the node (CONTENT_GUIDE.md §6).
+  doublePoints?: boolean;
   tags?: string[];
 }
 

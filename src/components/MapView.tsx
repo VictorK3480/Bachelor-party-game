@@ -211,8 +211,8 @@ export default function MapView({ state, availableNodeIds }: Props) {
   const PAD_Y_TOP = 90;
   // The node-select panel (prompt + choice buttons) overlays the bottom of the
   // frame - see .node-select-panel in styles.css. y=1 (the start row's
-  // neighbors) needs real clearance from it, more than the boss end (y=0)
-  // needs at the top.
+  // neighbors) needs real clearance from it, more than layer 9 (y=0) needs
+  // at the top.
   const PAD_Y_BOTTOM = 150;
 
   function px(x: number): number {

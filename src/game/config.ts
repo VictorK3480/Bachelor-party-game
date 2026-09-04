@@ -9,7 +9,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   treasureValue: 200,
   battleValue: 400,
   puzzleValue: 600,
-  mysteryValue: 400,
+  mysteryValue: 600,
   eliteValue: 800,
   bossValue: 1000,
 };
@@ -54,7 +54,7 @@ export const ENCOUNTER_LABEL: Record<EncounterType, string> = {
   TREASURE: 'Skat',
   BATTLE: 'Kamp',
   PUZZLE: 'Gåde',
-  MYSTERY: 'Mysterium',
+  MYSTERY: 'Mystery',
   ELITE: 'Elite',
   FINAL_BOSS: 'Finaleboss',
 };

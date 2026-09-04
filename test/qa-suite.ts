@@ -1,7 +1,12 @@
 import { GameManager } from '../src/game/manager';
 import { buildMap, validateMap } from '../src/game/map';
 import { DEFAULT_CONFIG } from '../src/game/config';
-import type { GameState } from '../src/types';
+import type { GameState, Question } from '../src/types';
+import questionsData from '../data/questions.json';
+
+const DOUBLE_POINTS_IDS = new Set(
+  (questionsData as Question[]).filter((q) => q.doublePoints).map((q) => q.id)
+);
 
 let passCount = 0;
 let failCount = 0;
@@ -255,7 +260,8 @@ section('SCORING: SYMMETRY, POSITIVE, NEGATIVE, WINNER CALCULATION');
       // separately below instead.
       if (r.encounterType === 'FINAL_BOSS') continue;
       const node = map[r.nodeId];
-      const expected = r.isCorrect ? node.value : -node.value;
+      const multiplier = DOUBLE_POINTS_IDS.has(r.questionId) ? 2 : 1;
+      const expected = (r.isCorrect ? node.value : -node.value) * multiplier;
       if (r.scoreChange !== expected) symmetryOk = false;
       if (!r.isCorrect && !r.forfeitId) forfeitAlwaysOnIncorrect = false;
       if (r.isCorrect && r.forfeitId) neverForfeitOnCorrect = false;
@@ -315,18 +321,30 @@ section('TIES');
   // Normal-encounter score only (excludes the shared final-round record,
   // which was deliberately steered to team A above and so is expected to
   // break the raw tie by design - GAME_DESIGN.md §14 winner-only scoring).
-  const normalScore = (teamId: string) =>
+  const rawScore = (teamId: string) =>
     state.turnHistory
       .filter((r) => r.teamId === teamId && r.encounterType !== 'FINAL_BOSS')
       .reduce((sum, r) => sum + r.scoreChange, 0);
+  // Identical node choices no longer guarantee identical *specific*
+  // questions (usedQuestionIds is global, so once one team draws a given
+  // question no other team can) - and a doublePoints question doubles that
+  // one record's contribution regardless of which team drew it. Dividing
+  // each record back out by its own multiplier isolates the thing this
+  // check actually cares about (same tier value + same correctness ->
+  // same contribution), independent of which team happened to draw the
+  // one doublePoints question at that tier.
+  const normalizedScore = (teamId: string) =>
+    state.turnHistory
+      .filter((r) => r.teamId === teamId && r.encounterType !== 'FINAL_BOSS')
+      .reduce((sum, r) => sum + r.scoreChange / (DOUBLE_POINTS_IDS.has(r.questionId) ? 2 : 1), 0);
   check(
-    'three teams with identical paths + identical correctness produce identical normal-encounter scores',
-    normalScore(a.id) === normalScore(b.id) && normalScore(b.id) === normalScore(c.id),
-    `A=${normalScore(a.id)} B=${normalScore(b.id)} C=${normalScore(c.id)}`
+    'three teams with identical paths + identical correctness produce identical normalized encounter scores',
+    normalizedScore(a.id) === normalizedScore(b.id) && normalizedScore(b.id) === normalizedScore(c.id),
+    `A=${normalizedScore(a.id)} B=${normalizedScore(b.id)} C=${normalizedScore(c.id)}`
   );
   check(
-    "the final round's winner-only bonus is exactly the difference between A's final score and the tied normal score",
-    a.score === normalScore(a.id) + DEFAULT_CONFIG.bossValue && b.score === normalScore(b.id) && c.score === normalScore(c.id)
+    "the final round's winner-only bonus is exactly the difference between A's final score and A's own normal-encounter score",
+    a.score === rawScore(a.id) + DEFAULT_CONFIG.bossValue && b.score === rawScore(b.id) && c.score === rawScore(c.id)
   );
 }
 

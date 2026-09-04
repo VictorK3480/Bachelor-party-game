@@ -365,13 +365,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Vertical padding scales down on short viewports (vh-driven clamp,
-     matching the root font-size technique above) instead of staying fixed -
-     otherwise this and the scoreboard together eat a disproportionate slice
-     of a small screen's height, squeezing .map-area (flex: 1, so it only
-     gets whatever's left) down to a cramped sliver. Unchanged on tall
-     screens (still caps at 0.6rem, today's value). */
-  padding: clamp(0.3rem, 1vh, 0.6rem) 1.25rem;
+  padding: 0.6rem 1.25rem;
   /* Translucent, not opaque - a little of the shared gradient shows through
      even here, which is what keeps this from reading as a solid bar dropped
      on top of a separate panel. Not fully transparent because header height
@@ -760,18 +754,13 @@ h2 {
 
 .node-select-panel {
   position: absolute;
-  /* Same vh-driven compaction as the header/scoreboard - this overlay
-     doesn't take layout space from .map-area, but it still visually covers
-     a chunk of the map's own bottom padding, and its rem-sized content
-     doesn't shrink along with the SVG on a small screen the way the map
-     itself does. Unchanged on tall screens (caps at today's values). */
-  bottom: clamp(0.4rem, 1vh, 0.75rem);
+  bottom: 0.75rem;
   left: 0;
   right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.4rem, 1.2vh, 0.75rem);
+  gap: 0.75rem;
   padding: 0 1rem;
 }
 
@@ -783,7 +772,7 @@ h2 {
   background: rgba(12, 13, 20, 0.72);
   border: 1px solid var(--panel-edge);
   border-radius: 999px;
-  padding: clamp(0.25rem, 0.8vh, 0.45rem) 1.1rem;
+  padding: 0.45rem 1.1rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -817,7 +806,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   gap: 0.3rem;
-  padding: clamp(0.4rem, 1.2vh, 0.7rem) 1.1rem;
+  padding: 0.7rem 1.1rem;
   border-radius: 10px;
   background: linear-gradient(160deg, #efe2bd, #d9c9a0);
   border: 2px solid var(--parchment-edge);
@@ -851,12 +840,12 @@ h2 {
 }
 
 .node-choice-icon {
-  width: clamp(1.9rem, 4.4vh, 2.52rem);
-  height: clamp(1.9rem, 4.4vh, 2.52rem);
+  width: 2.52rem;
+  height: 2.52rem;
 }
 
 .node-choice-label {
-  font-size: clamp(1rem, 2.3vh, 1.2rem);
+  font-size: 1.2rem;
 }
 
 .node-choice-icon-fill {
@@ -894,11 +883,7 @@ h2 {
   justify-content: space-evenly;
   align-items: center;
   gap: 0.5rem 1rem;
-  /* Same vh-driven compaction as .game-header, but this bar's own padding
-     was the biggest offender - its 1.5rem top pad alone was often larger
-     than the entire content row inside it. Unchanged on tall screens
-     (still caps at today's 1.5rem/0.9rem). */
-  padding: clamp(0.5rem, 2vh, 1.5rem) 1rem clamp(0.4rem, 1.2vh, 0.9rem);
+  padding: 1.5rem 1rem 0.9rem;
   /* Its own local fade rather than a flat tint - the shared .game-screen
      gradient stays parchment all the way down now, so this is what actually
      dissolves the parchment into the dark control bar. A flat translucent
@@ -1165,6 +1150,26 @@ h2 {
   line-height: 1.35;
 }
 
+/* A "sticker" flagging that this specific question doubles the node's
+   points both ways - the stakes only become clear once the question is
+   actually drawn, after the team has already committed to the node
+   (CONTENT_GUIDE.md §6). Reuses .result-stamp's own stamp-in keyframe for
+   the same slap-it-down feel. */
+.double-points-badge {
+  align-self: center;
+  font-family: 'Cinzel', 'Trebuchet MS', Georgia, serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  color: #3a2408;
+  background: linear-gradient(135deg, #ffdf7e, #f4c669 55%, #d99b3f);
+  padding: 0.35rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid var(--gold-ink);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  animation: stamp-in 0.35s cubic-bezier(0.2, 1.4, 0.5, 1);
+}
+
 .overlay-image-frame {
   padding: 6px;
   background: #0c0d14;
@@ -1241,9 +1246,13 @@ h2 {
   top: 0;
   left: 0;
   right: 0;
-  height: 18%;
-  min-height: 42px;
-  background: linear-gradient(180deg, rgba(12, 13, 20, 0.97) 55%, rgba(12, 13, 20, 0));
+  height: 22%;
+  min-height: 50px;
+  /* Fully opaque (not translucent) through most of the bar - a partial
+     alpha was still letting the title show through underneath. Only the
+     last stretch fades out, purely so the edge blends into the video
+     instead of ending in a hard line. */
+  background: linear-gradient(180deg, rgba(10, 11, 17, 1) 78%, rgba(10, 11, 17, 0));
   pointer-events: none;
 }
 
@@ -1598,4 +1607,101 @@ h2 {
 
 .results-screen .leaderboard-list {
   max-width: 420px;
+}
+
+/* ---------- Small-screen compaction ---------- */
+
+/* Every rule below only kicks in under a real height threshold (not a
+   subtle vh-scaled value that barely moves within typical laptop viewport
+   heights) - a decisive, visible step down in chrome size rather than a
+   fluid one that turned out to be imperceptible in practice. Targets
+   exactly the elements that eat into .map-area's height (header,
+   scoreboard) or visually cover the map itself (node-select-panel,
+   map-legend), so a small/short screen gets a meaningfully bigger map
+   instead of a cramped sliver surrounded by full-size chrome. Nothing here
+   changes above the threshold - normal/tall screens are unaffected. */
+@media (max-height: 820px) {
+  .game-header {
+    padding: 0.3rem 1rem;
+  }
+
+  /* The dark-to-parchment fade below was tuned for the taller default
+     header (60px solid, fully resolved to parchment by 150px). With the
+     shrunk header above, the map's top row now starts well before 150px,
+     so the still-fading part of the gradient was shadowing the top node
+     icons instead of sitting entirely behind the header. */
+  .game-screen {
+    background: linear-gradient(to bottom, var(--bg-deep) 0, var(--bg-deep) 16px, var(--parchment) 40px, var(--parchment) 100%);
+  }
+
+  .scoreboard {
+    padding: 0.5rem 0.75rem 0.5rem;
+    gap: 0.3rem 0.6rem;
+  }
+
+  .scoreboard-team {
+    padding: 0.2rem 0.6rem;
+  }
+
+  .scoreboard-crown {
+    font-size: 0.85rem;
+  }
+
+  .scoreboard-icon {
+    font-size: 1rem;
+  }
+
+  .node-select-panel {
+    bottom: 0.4rem;
+    gap: 0.4rem;
+  }
+
+  .node-select-prompt {
+    padding: 0.3rem 0.85rem;
+  }
+
+  .node-select-progress {
+    font-size: 0.72rem;
+  }
+
+  .node-choices {
+    gap: 0.5rem;
+  }
+
+  .node-choice-button {
+    padding: 0.4rem 0.8rem;
+    min-width: 90px;
+  }
+
+  .node-choice-icon {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .node-choice-label {
+    font-size: 1rem;
+  }
+
+  .node-choice-value {
+    font-size: 0.85rem;
+  }
+
+  .map-legend {
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .map-legend-panel {
+    padding: 0.35rem 0.55rem;
+    gap: 0.25rem;
+  }
+
+  .map-legend-row {
+    font-size: 0.8rem;
+  }
+
+  .map-legend-icon {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
 }

@@ -31,6 +31,8 @@ Optional fields:
 choices
 image
 media
+forfeitId
+doublePoints
 explanation
 tags
 ```
@@ -146,6 +148,10 @@ The architecture should allow additional question types later.
 ### The final boss question
 
 The single climactic final-boss question is stored separately, in `data/final-boss.json`, as one `Question` object (not an array). It is posed once, shared by every team at once, at the end of the game — see GAME_DESIGN.md §14. Edit it the same way as any other question; it doesn't need a `difficulty` that matches anything, since it's never drawn from the main pool.
+
+### Double points
+
+Set `"doublePoints": true` on any question (any type) to double the node's point value for that question specifically, both ways — correct gives +2× the node's value, incorrect deducts −2×. The public display shows a "🌟 Dobbelt Point 🌟" badge and the doubled value once that question is drawn, but the team only finds out after committing to the node — the risk/reward only becomes real once the question itself appears. Use sparingly, for questions the group already thinks of as a bigger deal.
 
 ---
 
@@ -374,6 +380,18 @@ Example:
 Unlike questions, forfeits are never excluded once used — the same forfeit can come up more than once in a game — but each use makes it progressively less likely to be picked again relative to the rest of the pool (see TECHNICAL_SPEC.md §12), so a smaller pool (the current 15) is fine; repeats will lean toward the ones used least so far.
 
 There's no association between a forfeit and how hard the question was — a forfeit is drawn from the whole pool regardless of which node/difficulty the wrong answer came from.
+
+A question can pin itself to one exact forfeit via `forfeitId` (its id in this file) instead of drawing randomly — useful when a forfeit is written specifically for that question (e.g. a song question paired with a forfeit that acts out the song). A forfeit referenced this way is reserved for that question alone: it's excluded from the random pool, so it never turns up for an unrelated wrong answer. Every question without `forfeitId` keeps drawing randomly as normal. Example:
+
+```json
+{
+  "id": "noerdelort2-spicy-01",
+  "type": "audio",
+  "question": "Hvornår er denne sang fra, hvad hedder den, og hvem har lavet den?",
+  "answer": "1987, \"Never Gonna Give You Up\" af Rick Astley",
+  "forfeitId": "forfeit-016"
+}
+```
 
 Forfeits should be:
 

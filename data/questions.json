@@ -6,6 +6,7 @@
     "type": "text",
     "question": "Hvilken by i USA er infamøs for at have en del af Patricks familie boende?",
     "answer": "Toledo, Ohio",
+    "doublePoints": true,
     "tags": ["usa", "patrick"]
   },
   {
@@ -219,6 +220,7 @@
     "type": "text",
     "question": "Hvor mange ringe er der i Ringenes Herre, og hvem havde dem?",
     "answer": "20 — 3 til elverne, 7 til dværgene, 9 til menneskerne og 1 til Sauron",
+    "doublePoints": true,
     "tags": ["lotr"]
   },
   {
@@ -322,6 +324,7 @@
     "type": "text",
     "question": "Hvor mange timer har Patrick i The Binding of Isaac: Rebirth? (+-30)",
     "answer": "360 timer",
+    "doublePoints": true,
     "tags": ["patrick", "gaming"]
   },
   {
@@ -451,6 +454,7 @@
     "question": "Hvornår er denne sang fra, hvad hedder den, og hvem har lavet den?",
     "media": "audio/questions/noerdelort2-spicy-01.mp3",
     "answer": "1987, \"Never Gonna Give You Up\" af Rick Astley",
+    "forfeitId": "forfeit-016",
     "tags": ["meme", "spicy"]
   },
   {

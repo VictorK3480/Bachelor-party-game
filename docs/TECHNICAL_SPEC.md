@@ -74,6 +74,11 @@ question
 answer
 choices (optional)
 image (optional)
+media (optional - audio/video source, see CONTENT_GUIDE.md §2)
+youtubeId (optional, see CONTENT_GUIDE.md §2)
+clipStart, clipEnd (optional, seconds - see CONTENT_GUIDE.md §2)
+forfeitId (optional - pins this question to one specific forfeit, see CONTENT_GUIDE.md §11)
+doublePoints (optional - doubles the node's value both ways for this question, see CONTENT_GUIDE.md §2)
 explanation (optional)
 tags (optional)
 ```
@@ -290,7 +295,7 @@ encountersCompleted
 
 A team's `position` can equal another team's `position` — teams are allowed to share a node.
 
-The game state must make it impossible for a team to complete more than 10 encounters.
+The game state must make it impossible for a team to complete more than 9 encounters (its own map path - the shared final round is separate, see §6/GAME_DESIGN.md §14).
 
 ---
 
@@ -368,6 +373,8 @@ Example:
 
 Select forfeits randomly, weighted away from repeats rather than excluding used ones outright: each forfeit's selection weight is `1 / (useCount + 1)`, so one used once is half as likely as a fresh one, one used twice a third as likely, and so on — the same forfeit can still be selected more than once in a game, just with falling odds each time. Track `forfeitUseCounts` (forfeit id → times used) in game state for this, reverted by undo like any other state. This weighting is unrelated to question difficulty/category — the forfeit pool itself has no such association.
 
+A question can instead pin itself to one exact forfeit via `Question.forfeitId` (§4), bypassing the random pool entirely for that question. A forfeit referenced this way is excluded from the random pool for every other question, so it's reserved exclusively for its paired question.
+
 Resolution is a single action: the GM clicks a **Forfeit Complete** control once it has been performed, which unblocks turn advancement. The application does not verify that the forfeit was actually performed.
 
 Do not make forfeits part of the scoring system.
@@ -376,75 +383,58 @@ Do not make forfeits part of the scoring system.
 
 ## 13. Display Architecture
 
-The application uses a **dual-display system** via a split-screen layout (or separate window mode):
+The application uses a **single shared screen** for both players and the game master — there is no split-screen layout, no separate window mode, and no distinct "public" vs "GM" view. Everyone, game master included, looks at the same rendered state at all times (GAME_DESIGN.md §15).
 
-### Public Display (Left/External)
-- Optimized for 1080p TV/projector viewing from several meters away
-- Minimal controls — read-only presentation of game state
-- Shows:
-  - Title: "⚔️ BACHELOR QUEST ⚔️" with gradient text effect
-  - Current team identity, score, and progress
-  - Encounter card (icon, type, point value) with color-coded border
-  - Question text in large serif font (52px minimum)
-  - Multiple-choice options (if applicable) with gold letter labels (A/B/C/D)
-  - Canonical answer (when revealed) with glowing gold animation
-  - Forfeit text (when active) with pulsing red animation
-  - Leaderboard status bar at bottom with all team tokens, scores, and progress
-  - Dramatic emoji-based theming throughout
+Shown at all times:
+- The map: nodes with per-type icons, visible connection paths, team tokens
+- A persistent scoreboard bar (every team's name and score)
+- Current team, current encounter type/value
 
-### GM Control Interface (Right/Laptop)
-- Comprehensive controls for game progression
-- Shows same game state as public display but adds controls:
-  - Node selection buttons for available moves
-  - "📢 Reveal Answer" button to trigger answer display on public display
-  - "✓ Correct" and "✗ Incorrect" buttons to resolve the answer
-  - "🎭 Forfeit Complete" button to advance after forfeit is performed
-  - "↶ Undo" button for the previous action
-  - Current team details, leaderboard, and game statistics
-  - Blurred answer preview (opacity 0.3, blur 3px) until reveal is triggered
+Shown as an overlay on top of the map during a turn:
+- The question (and its image/audio/video/YouTube clip, if it has one)
+- Multiple-choice options, if applicable
+- The canonical answer, once revealed
+- Correct/incorrect result and score change
+- The forfeit, if the answer was incorrect
+
+Game-master controls (node selection, reveal, correct/incorrect, forfeit-complete, undo) live inline in this same view, not in a separate control panel.
 
 ### Answer Security Model
 
-**The canonical answer is never visible on the public display before the GM authorizes it.**
+**The canonical answer is never visible to anyone, game master included, before it's explicitly revealed.**
 
-- **Before ANSWER_REVEAL**: Answer is not rendered in any component
-- **During ANSWER_REVEAL (before reveal)**: Public display shows "⏳ AWAITING REVELATION ⏳" message
-- **After GM clicks reveal**: Answer displays prominently with glowing animation
-- **GM Interface**: Answer is always visible to GM (visually dimmed before reveal, clear after)
+- Before reveal: the answer is not rendered in any component
+- The game master clicks "Vis svaret" ("Reveal Answer") to reveal it
+- After that click: the answer displays prominently for everyone at once, with a glowing animation
 
-The single source of truth for answer visibility is `gameState.isAnswerRevealed` boolean.
-
-All other game state (questions, node values, team scores, encounter types, etc.) is visible in both displays at all times.
+The single source of truth for answer visibility is `gameState.isAnswerRevealed` (and `isFinalAnswerRevealed` for the shared final round). All other game state (questions, node values, team scores, encounter types, etc.) is visible at all times.
 
 ---
 
 ## 14. Display Styling
 
-The public display uses inline React styles for component encapsulation:
+Styling lives in `src/styles.css` (CSS custom properties + component classes), not inline styles - that file is the source of truth for exact values; this section describes the approach, not a fixed spec to match against.
 
 ### Visual Theme
-- **Background**: Gradient linear-gradient(135deg, #0a0e27 0%, #1a1a3e 40%, #2d1b3e 100%) (dark blue to purple)
-- **Primary Font**: "Cinzel", "Georgia", serif (fantasy/medieval aesthetic)
-- **Primary Color**: Cyan #64c8ff
-- **Accent Color**: Gold #ffd700
-- **Danger Color**: Red #ff6464
-- **Glow Color**: Theme-specific (matches encounter type)
+- **Background**: a dark blue-to-purple gradient with soft ambient glows (`--bg-deep` plus radial highlights)
+- **Primary Font**: "Cinzel" for headers/labels, a Georgia-based serif stack for body/question text (fantasy/medieval aesthetic)
+- **Accent Color**: gold (`--gold` / `--gold-dim`)
+- **Positive/Negative**: green / red (`--good` / `--bad`)
+- **Per-category Color**: each encounter type (Treasure/Battle/Puzzle/Mystery/Elite) has its own accent hue, used for that type's map nodes, node-choice buttons, and question-overlay border
 
 ### Animations
-- **pulse**: Opacity toggle (2s infinite) for waiting states and forfeit display
-- **glow**: Box-shadow pulsing (2s infinite) for answer reveal box
-- **scoreFlash**: Scale+color flash (1.5s) triggered on score updates
+- Pulsing rings/glows for available map nodes and waiting states
+- A pop-in/reveal animation for the answer once shown
+- A score-pop animation on the scoreboard when a value changes
+- A stamp-in animation for result badges (correct/incorrect, double-points, final-round winner)
 
-### Readable from Distance
-Minimum font sizes for TV viewing:
-- Title: 72px
-- Team name: 54px
-- Current score display: 48px
-- Question text: 52px
-- Encounter label: 36px
-- Status bar text: 22-26px
+### Responsive Sizing
 
-Encounter cards use 80px emoji icons with drop-shadow filters for visibility.
+Two independent mechanisms, not a fixed px table:
+- The root font-size scales up on larger viewports (`clamp()`, driven by viewport width+height) so text/icons read clearly from TV/projector distance - everything else is sized in `rem` off of it.
+- Below a short-viewport threshold (`@media (max-height: 820px)`), the header, scoreboard, node-select panel, and map legend switch to decisively more compact padding/sizing instead, so the map itself gets more of a small screen instead of being squeezed by full-size chrome.
+
+The map's own icons/nodes scale continuously with the actual measured size of their container (a `ResizeObserver`, not CSS breakpoints), independent of the two mechanisms above.
 
 ---
 
@@ -469,7 +459,7 @@ Prevent:
 - repeated questions
 - invalid node selection
 - skipping turns
-- completing more than 10 encounters
+- completing more than 9 encounters on the map
 - advancing before answer resolution
 - revealing answers prematurely
 

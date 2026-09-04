@@ -1,4 +1,10 @@
 import { GameManager } from '../src/game/manager';
+import type { Question } from '../src/types';
+import questionsData from '../data/questions.json';
+
+const DOUBLE_POINTS_IDS = new Set(
+  (questionsData as Question[]).filter((q) => q.doublePoints).map((q) => q.id)
+);
 
 // Simulates a complete 4-team game via the public GameManager API, exactly
 // the way the UI would drive it, and checks the resulting state for
@@ -146,9 +152,10 @@ function simulateGame(): boolean {
     ['Negative scores are supported (at least one occurred or all-correct run)', true],
     ['Game phase is GAME_END', state.gamePhase === 'GAME_END'],
     ['Undo was exercised at least once', undosPerformed > 0],
-    ['Scores recorded symmetrically (correct=+value, incorrect=-value)', state.turnHistory.every((r) => {
+    ['Scores recorded symmetrically (correct=+value, incorrect=-value, doubled for doublePoints questions)', state.turnHistory.every((r) => {
       const node = Object.values(state.map).find((n) => n.encounterType === r.encounterType);
-      return node ? Math.abs(r.scoreChange) === (r.isCorrect ? node.value : node.value) : true;
+      const multiplier = DOUBLE_POINTS_IDS.has(r.questionId) ? 2 : 1;
+      return node ? Math.abs(r.scoreChange) === node.value * multiplier : true;
     })],
   ];
 

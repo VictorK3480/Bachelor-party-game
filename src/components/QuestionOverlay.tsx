@@ -48,7 +48,10 @@ export default function QuestionOverlay({ manager, onChange }: Props) {
             <span className="overlay-icon">{ENCOUNTER_ICON[encounter.encounterType]}</span>
             <span className="overlay-header-text">
               {ENCOUNTER_LABEL[encounter.encounterType]}
-              <span className="overlay-header-value"> · ±{encounter.value}</span>
+              <span className="overlay-header-value">
+                {' '}
+                · ±{question.doublePoints ? encounter.value * 2 : encounter.value}
+              </span>
             </span>
           </span>
           {/* Undo needs to be reachable from in here too, not just the game
@@ -71,9 +74,8 @@ export default function QuestionOverlay({ manager, onChange }: Props) {
           </button>
         </div>
 
-        <p className="overlay-category">
-          {question.category} · sværhedsgrad {question.difficulty}/5
-        </p>
+        {question.doublePoints && <div className="double-points-badge">🌟 Dobbelt Point 🌟</div>}
+
         <h2 className="overlay-question">{question.question}</h2>
 
         {actionError && <p className="overlay-error">{actionError}</p>}

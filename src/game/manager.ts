@@ -38,6 +38,11 @@ export class GameManager {
   private questionPool: Question[];
   private forfeitPool: Forfeit[];
   private finalBossQuestion: Question;
+  // Forfeits pinned to a specific question via Question.forfeitId are
+  // reserved for that question alone - excluded from the general random
+  // pool so they don't also turn up for unrelated wrong answers, diluting
+  // the whole point of coupling them.
+  private randomForfeitPool: Forfeit[];
   private previousSnapshot: GameState | null = null;
 
   constructor(teamNames: string[], config: GameConfig = DEFAULT_CONFIG) {
@@ -53,6 +58,8 @@ export class GameManager {
     this.questionPool = questions;
     this.forfeitPool = forfeits;
     this.finalBossQuestion = finalBossQuestion;
+    const coupledForfeitIds = new Set(questions.map((q) => q.forfeitId).filter((id): id is string => Boolean(id)));
+    this.randomForfeitPool = forfeits.filter((f) => !coupledForfeitIds.has(f.id));
 
     const map = buildMap(config);
     validateMap(map);
@@ -121,6 +128,17 @@ export class GameManager {
     return null;
   }
 
+  // Most questions draw randomly from the whole pool (CONTENT_GUIDE.md
+  // §11), but a question can pin itself to one specific forfeit via
+  // `forfeitId` (content.ts validates that id exists at load time, so the
+  // lookup here is trusted to succeed).
+  private selectForfeitFor(question: Question): Forfeit {
+    if (question.forfeitId) {
+      return this.forfeitPool.find((f) => f.id === question.forfeitId)!;
+    }
+    return selectForfeit(this.randomForfeitPool, this.state.forfeitUseCounts);
+  }
+
   selectNode(nodeId: string): void {
     if (this.state.gamePhase !== 'NODE_SELECT') {
       throw new Error(`Cannot select a node during phase ${this.state.gamePhase}.`);
@@ -180,12 +198,13 @@ export class GameManager {
     // state is mutated, so a failure here never leaves a half-applied score
     // change with no matching turn record - mirrors the same safe ordering
     // used in selectNode() for question selection.
-    const forfeit = isCorrect ? null : selectForfeit(this.forfeitPool, this.state.forfeitUseCounts);
+    const forfeit = isCorrect ? null : this.selectForfeitFor(encounter.question);
 
     this.snapshot();
 
     const team = this.currentTeam;
-    const scoreChange = isCorrect ? encounter.value : -encounter.value;
+    const pointMultiplier = encounter.question.doublePoints ? 2 : 1;
+    const scoreChange = (isCorrect ? encounter.value : -encounter.value) * pointMultiplier;
     team.score += scoreChange;
 
     const record: TurnRecord = {

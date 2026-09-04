@@ -88,5 +88,11 @@
     "text": "Et holdmedlem shotgunner en øl.",
     "intensity": 2,
     "tags": ["drink", "physical"]
+  },
+  {
+    "id": "forfeit-016",
+    "text": "Holdet skal synge og danse med til \"Never Gonna Give You Up\", mens den spilles færdig.",
+    "intensity": 2,
+    "tags": ["performance", "group", "funny"]
   }
 ]

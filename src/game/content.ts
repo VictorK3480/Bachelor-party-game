@@ -7,7 +7,7 @@ const VALID_TYPES: QuestionType[] = ['text', 'multiple-choice', 'image', 'audio'
 
 // TECHNICAL_SPEC.md §3 / CONTENT_GUIDE.md §12: validate content and report
 // useful errors rather than failing silently.
-function validateQuestions(questions: Question[]): string[] {
+function validateQuestions(questions: Question[], forfeitIds: ReadonlySet<string>): string[] {
   const errors: string[] = [];
   const seenIds = new Set<string>();
 
@@ -51,6 +51,9 @@ function validateQuestions(questions: Question[]): string[] {
     }
     if (q.clipStart !== undefined && q.clipEnd !== undefined && q.clipStart >= q.clipEnd) {
       errors.push(`Question ${label}: clipStart (${q.clipStart}) must be before clipEnd (${q.clipEnd}).`);
+    }
+    if (q.forfeitId && !forfeitIds.has(q.forfeitId)) {
+      errors.push(`Question ${label}: forfeitId "${q.forfeitId}" does not match any forfeit in data/forfeits.json.`);
     }
   }
 
@@ -107,8 +110,9 @@ export function loadContent(): LoadedContent {
   const questions = questionsData as Question[];
   const forfeits = forfeitsData as Forfeit[];
   const finalBossQuestion = finalBossData as Question;
+  const forfeitIds = new Set(forfeits.map((f) => f.id));
   const errors = [
-    ...validateQuestions(questions),
+    ...validateQuestions(questions, forfeitIds),
     ...validateForfeits(forfeits),
     ...validateFinalBossQuestion(finalBossQuestion),
   ];

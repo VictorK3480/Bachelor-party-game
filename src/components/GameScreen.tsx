@@ -71,7 +71,7 @@ export default function GameScreen({ manager, onChange }: Props) {
                 {currentTeam.icon} {currentTeam.name}
               </span>
               's tur — vælg din vej
-              <span className="node-select-progress">Udfordring {currentTeam.encountersCompleted + 1}/9</span>
+              <span className="node-select-progress">Spørgsmål {currentTeam.encountersCompleted + 1}/9</span>
             </p>
             <div className="node-choices">
               {availableNodes.map((nodeId) => {

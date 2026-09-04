@@ -13,17 +13,14 @@ The game combines:
 
 ### Display Architecture
 
-The game uses a **dual-display system**:
+The game uses a **single shared screen** for both players and the game master — there is no separate public-only display and GM-only display (see §15). The game master drives the game forward from the same view everyone else is watching (e.g. on a shared TV/projector), rather than a private control panel.
 
-- **Public Display** (1080p TV/Projector): Fantasy-themed presentation optimized for viewing from several meters away. Shows current team, encounter type, question, answer reveal (when authorized), forfeit, and leaderboard.
-- **GM Control Interface** (Laptop): Comprehensive control panel for game progression, answer validation, node selection, and game management.
-
-The public display features:
+The display features:
 - Gradient dark blue-to-purple background
 - Serif "Cinzel" font for fantasy aesthetic
 - Emoji-based icons (🗡️ 🏹 🛡️ 🔥) for teams and (💎 ⚔️ 🧩 🔮 👑 🐉) for encounter types
 - Glowing and pulsing animations for dramatic answer reveals and forfeits
-- Large, readable typography (52-72px minimum) for TV viewing distance
+- Large, readable typography that scales up on bigger screens for viewing distance, and compacts back down on smaller ones (§15)
 - Color-coded encounter cards matching encounter type themes
 
 The game is fundamentally a quiz, not an RPG.
@@ -39,7 +36,7 @@ The game is fundamentally a quiz, not an RPG.
   - Icon/Token (auto-assigned emoji: 🗡️ 🏹 🛡️ 🔥)
   - Score (starts at 0)
   - Position on map
-  - Encounters completed counter (0/10)
+  - Encounters completed counter (0/9)
 - Every team starts at 0 points
 - Scores may become negative
 - There is no minimum score
@@ -63,26 +60,17 @@ Teams play in a fixed turn order. Each phase is visually distinct on the public 
 Once every team has completed its 9th encounter, normal turn-taking stops and the game moves into the shared Final Boss round (§14) instead of continuing to a 10th per-team turn.
 
 ### Phase: TURN_START
-GM selects the next node for the current team.
-- Public Display: Shows current team with "✨ Team Selecting Path ✨" message
-- GM Interface: Displays available connected nodes with encounter type and point value
+The current team picks their next node from the map, on the shared screen everyone is watching — showing each reachable node's encounter type and point value, not the question.
 
 ### Phase: QUESTION_DISPLAY
-Question is presented to the team for discussion.
-- Public Display: Shows the question text (52px font), and if applicable, multiple-choice options (A/B/C/D) or images
-- GM Interface: Shows question and canonical answer (blurred until reveal)
-- Team discusses and provides an answer verbally
+The question (and its image/audio/video/YouTube clip, if it has one) is shown to everyone at once. The team discusses and answers verbally. The canonical answer is not rendered anywhere yet.
 
 ### Phase: ANSWER_REVEAL
-GM reviews the team's answer.
-- Public Display: Shows "⏳ AWAITING REVELATION ⏳" until GM triggers reveal, then displays the canonical answer in glowing gold box with "✨ THE ANSWER ✨" heading and optional explanation
-- GM Interface: Answer becomes clear (unblurred), GM clicks "✓ Correct" or "✗ Incorrect"
+The game master clicks "Vis svaret" ("Reveal Answer") when ready. The canonical answer then appears for everyone simultaneously — there is no GM-only preview beforehand. The game master then marks the team's verbal answer "✓ Korrekt" or "✗ Forkert".
 
 ### Phase: FORFEIT_DISPLAY (if incorrect)
-Team performs the forfeit.
-- Public Display: Displays forfeit text in pulsing red box with "🎭 FORFEIT 🎭" heading
-- GM Interface: "Forfeit Complete" button to advance after forfeit is performed
-- Scoring automatically applied: score ± node value
+Team performs the forfeit, shown on the same shared screen. The game master clicks "Straffen er udført" ("Forfeit Complete") once it's been performed.
+- Scoring automatically applied: score ± node value (§12; doubled for a double-points question)
 - Team progresses to selected node
 
 ### Turn Completion
@@ -98,12 +86,12 @@ There is no time limit on any step. The game master controls the pacing by manua
 
 ### Answer Security
 
-The canonical answer is **never visible on the public display before the GM authorizes it**. This prevents spoiling for the audience:
-- During QUESTION_DISPLAY: answer is not rendered anywhere
-- During ANSWER_REVEAL: answer is hidden with "⏳ AWAITING REVELATION ⏳" message until GM clicks "📢 Reveal Answer"
-- After reveal: answer displays prominently with glowing animation
+The canonical answer is **never visible before the game master authorizes it**, since everyone (including the game master) is looking at the same screen:
+- During QUESTION_DISPLAY: the answer is not rendered anywhere
+- The game master clicks "Vis svaret" ("Reveal Answer") to reveal it
+- After that click: the answer displays prominently for everyone at once, with a glowing animation
 
-The GM interface always shows the answer for reference, but it is visually dimmed/blurred before the reveal action, becoming clear after.
+There is no separate GM-only view where the answer is visible early (dimmed or otherwise) — the game master learns it at the same moment as everyone else, by choosing to click reveal.
 
 ---
 
@@ -147,35 +135,35 @@ Easy question. **Difficulty 2.**
 
 **±200 points**
 
-Public Display: Golden icon with gold accent color
+Display: golden icon with gold accent color
 
 ### BATTLE ⚔️ (Red)
 Medium question. **Difficulty 3.**
 
 **±400 points**
 
-Public Display: Sword icon with red accent color
+Display: sword icon with red accent color
 
-### PUZZLE 🧩 (Cyan)
+### PUZZLE 🧩 (Blue)
 Hard question. **Difficulty 4.**
 
 **±600 points**
 
-Public Display: Puzzle piece icon with cyan accent color
+Display: puzzle piece icon with blue accent color
 
 ### MYSTERY 🔮 (Purple)
 Medium question with a less predictable category or format. **Difficulty 3.** Prefers a media question (image/audio/video/youtube) with accompanying question text over a plain text question, when one is available.
 
-**±400 points**
+**±600 points**
 
-Public Display: Crystal ball icon with purple accent color
+Display: crystal ball icon with purple accent color
 
-### ELITE 👑 (Orange)
+### ELITE 👑 (Magenta)
 Very hard question. **Difficulty 5.**
 
 **±800 points**
 
-Public Display: Crown icon with orange accent color
+Display: crown icon with magenta accent color
 
 Difficulty 1 (very easy) is not directly targeted by any encounter type. It exists as an extra buffer/fallback tier for the question-selection system (see §9).
 
@@ -361,6 +349,8 @@ Examples:
 
 Negative scores are intentional.
 
+A question can be flagged as double points, doubling its node's value both ways for that one question (+2×value if correct, −2×value if incorrect). Which questions are double points is content data, not something the team can see before they've already committed to a node — the stakes only become clear once the question itself is drawn.
+
 This ± symmetry applies to normal map encounters only. The shared Final Boss round (§14) uses a different, asymmetric rule: only the closest team is scored.
 
 The winner is the team with the highest score after the shared Final Boss round.
@@ -384,7 +374,7 @@ A forfeit contains:
 
 Forfeits are randomly selected, weighted by how many times each has already come up this game (weight = 1 / (useCount + 1)) — a forfeit that hasn't been used yet is more likely to be picked than one that has, but nothing is ever excluded. Unlike questions, forfeits are never fully "used up" — the same forfeit may come up more than once in a game, just with progressively lower odds each time.
 
-There is no association between a forfeit and the difficulty of the question that triggered it — the forfeit pool is flat and unrelated to encounter type/difficulty.
+There is no association between a forfeit and the difficulty of the question that triggered it — the forfeit pool is flat and unrelated to encounter type/difficulty. The one exception is a question deliberately paired with a specific forfeit (content data, not a game rule) — that forfeit always applies for that question, and is otherwise held out of the random pool.
 
 Forfeits do not affect:
 - score
