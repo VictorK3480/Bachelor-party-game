@@ -2,7 +2,10 @@ import type { EncounterType, GameConfig } from '../types';
 
 export const DEFAULT_CONFIG: GameConfig = {
   teamCount: 4,
-  encountersPerTeam: 10,
+  // The final boss is no longer a per-team map node (see manager.ts's
+  // shared FINAL_ROUND phase) - a team's own path is exactly the 9 normal
+  // map layers.
+  encountersPerTeam: 9,
   treasureValue: 200,
   battleValue: 400,
   puzzleValue: 600,
@@ -25,6 +28,9 @@ export function encounterValue(config: GameConfig, type: EncounterType): number 
 }
 
 // GAME_DESIGN.md §6 / TECHNICAL_SPEC.md §6: encounter type -> target question difficulty.
+// FINAL_BOSS is unused by selection.ts's selectQuestion() - the boss question
+// is dedicated content (data/final-boss.json), never difficulty-matched from
+// the pool. The entry only exists to satisfy Record<EncounterType, number>.
 export const ENCOUNTER_DIFFICULTY: Record<EncounterType, number> = {
   TREASURE: 2,
   BATTLE: 3,
@@ -45,12 +51,12 @@ export const ENCOUNTER_ICON: Record<EncounterType, string> = {
 };
 
 export const ENCOUNTER_LABEL: Record<EncounterType, string> = {
-  TREASURE: 'Treasure',
-  BATTLE: 'Battle',
-  PUZZLE: 'Puzzle',
-  MYSTERY: 'Mystery',
+  TREASURE: 'Skat',
+  BATTLE: 'Kamp',
+  PUZZLE: 'Gåde',
+  MYSTERY: 'Mysterium',
   ELITE: 'Elite',
-  FINAL_BOSS: 'Final Boss',
+  FINAL_BOSS: 'Finaleboss',
 };
 
 export const TEAM_ICONS = ['\u{1F6E1}️', '\u{1F5E1}️', '\u{1F3F9}', '\u{1F52E}'];

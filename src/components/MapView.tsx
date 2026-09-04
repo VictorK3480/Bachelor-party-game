@@ -26,7 +26,7 @@ const MAX_ASPECT = 1.0;
 const DEFAULT_ASPECT = 0.9; // used for the first paint, before ResizeObserver reports
 
 function nodeRadius(nodeId: string): number {
-  return nodeId === 'start' ? 22 : nodeId === 'boss' ? 44 : 30;
+  return nodeId === 'start' ? 22 : 30;
 }
 
 interface NodeObstacle {
@@ -208,10 +208,7 @@ export default function MapView({ state, availableNodeIds }: Props) {
 
   const WIDTH = Math.round(HEIGHT * aspect);
   const PAD_X = Math.round(WIDTH * 0.075);
-  // Extra top margin (up from 90) so the boss - now pushed to y < 0, see
-  // map.ts - has real room above the canvas's own top edge instead of
-  // being cramped against it.
-  const PAD_Y_TOP = 115;
+  const PAD_Y_TOP = 90;
   // The node-select panel (prompt + choice buttons) overlays the bottom of the
   // frame - see .node-select-panel in styles.css. y=1 (the start row's
   // neighbors) needs real clearance from it, more than the boss end (y=0)
@@ -260,7 +257,7 @@ export default function MapView({ state, availableNodeIds }: Props) {
             <feTurbulence type="fractalNoise" baseFrequency="0.012 0.05" numOctaves="2" seed="7" result="noise" />
             <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
           </filter>
-          {(['start', 'treasure', 'battle', 'puzzle', 'mystery', 'elite', 'boss'] as const).map((key) => (
+          {(['start', 'treasure', 'battle', 'puzzle', 'mystery', 'elite'] as const).map((key) => (
             <radialGradient key={key} id={`grad-${key}`} cx="35%" cy="28%" r="75%">
               <stop offset="0%" stopColor={`var(--c-${key}-light)`} />
               <stop offset="55%" stopColor={`var(--c-${key})`} />
@@ -334,10 +331,9 @@ export default function MapView({ state, availableNodeIds }: Props) {
 
         <g className="map-nodes">
           {nodes.map((node) => {
-            const radius = node.id === 'start' ? 22 : node.id === 'boss' ? 44 : 30;
+            const radius = node.id === 'start' ? 22 : 30;
             const isAvailable = available.has(node.id);
             const isVisited = visited.has(node.id);
-            const isBoss = node.id === 'boss';
             const stateClass = isAvailable
               ? 'node-available'
               : isVisited
@@ -351,8 +347,7 @@ export default function MapView({ state, availableNodeIds }: Props) {
             const rimDash = `${rimArc} ${bevelCircumference - rimArc}`;
             // Every stroke width here is derived from radius rather than a
             // flat CSS value, so they stay visually proportional across the
-            // three node sizes (start/normal/boss) instead of looking
-            // thin on the boss and thick on start.
+            // two node sizes (start/normal) instead of looking uneven.
             const circleStroke = radius * 0.1;
             const rimStroke = radius * 0.09;
             // Both grown ~20% together (not just the glyph) so the glyph
@@ -364,11 +359,10 @@ export default function MapView({ state, availableNodeIds }: Props) {
             return (
               <g
                 key={node.id}
-                className={`map-node ${stateClass} ${isBoss ? 'map-node-boss' : ''}`}
+                className={`map-node ${stateClass}`}
                 transform={`translate(${px(node.x)}, ${py(node.y)})`}
               >
                 {isAvailable && <circle r={radius + 12} className="node-pulse-ring" />}
-                {isBoss && <circle r={radius + 16} className="node-boss-aura" />}
                 <circle
                   r={radius}
                   className={`node-circle node-${node.encounterType ?? 'START'}`}
@@ -422,7 +416,7 @@ export default function MapView({ state, availableNodeIds }: Props) {
           {nodes.flatMap((node) => {
             const teams = teamsByNode.get(node.id);
             if (!teams || teams.length === 0) return [];
-            const stackAbove = node.y > 0.03; // keep tokens on-canvas near the very top row (the boss)
+            const stackAbove = node.y > 0.03; // keep tokens on-canvas near the very top row (layer 9)
             // 'start' is the one node every team is guaranteed to share at
             // once, and it sits only ~76 units from the layer-1 row above
             // it (radius 30) - there's well under 24 units of genuinely

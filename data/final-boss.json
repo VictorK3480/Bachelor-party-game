@@ -1,0 +1,9 @@
+{
+  "id": "final-boss-001",
+  "category": "Final Boss",
+  "difficulty": 5,
+  "type": "text",
+  "question": "Hvor mange kilometer er der i fugleflugt mellem Patricks og Louises barndomsbyer? (Tættest på vinder)",
+  "answer": "202 km",
+  "tags": ["patrick", "louise", "final-boss"]
+}

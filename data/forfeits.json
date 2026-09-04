@@ -1,134 +1,92 @@
 [
   {
     "id": "forfeit-001",
-    "text": "Speak in a dramatic fantasy narrator voice until your next turn.",
+    "text": "Hele holdet tager en tår.",
     "intensity": 1,
-    "tags": ["funny", "performance"]
+    "tags": ["drink", "group"]
   },
   {
     "id": "forfeit-002",
-    "text": "Give the groom a dramatic 20-second fantasy RPG-style prophecy.",
-    "intensity": 2,
-    "tags": ["performance", "funny"]
+    "text": "Hele holdet drikker, men lader en anden for holdet hælde.",
+    "intensity": 1,
+    "tags": ["drink", "group"]
   },
   {
     "id": "forfeit-003",
-    "text": "Do 10 push-ups before the next round.",
+    "text": "Holdet skal rejse sig og synge et vers af en sang, valgt af de andre hold.",
+    "intensity": 2,
+    "tags": ["performance", "group"]
+  },
+  {
+    "id": "forfeit-004",
+    "text": "Vælg en fra holdet der skal stå på hovedet i 15 sekunder (må gerne få hjælp).",
     "intensity": 2,
     "tags": ["physical"]
   },
   {
-    "id": "forfeit-004",
-    "text": "The whole team must high-five every other team before play continues.",
-    "intensity": 1,
-    "tags": ["group"]
-  },
-  {
     "id": "forfeit-005",
-    "text": "Sing the chorus of a song of the group's choosing.",
+    "text": "Ét holdmedlem bliver udpeget til at bunde en genstand — holdet vælger hvem.",
     "intensity": 2,
-    "tags": ["performance", "funny"]
+    "tags": ["drink"]
   },
   {
     "id": "forfeit-006",
-    "text": "One team member must act out their favorite movie scene in silence.",
+    "text": "Personen der svarede bunder sin genstand.",
     "intensity": 2,
-    "tags": ["performance"]
+    "tags": ["drink"]
   },
   {
     "id": "forfeit-007",
-    "text": "Take a shot (or a big sip) of your drink.",
+    "text": "Personen der svarede tager et valgfrit shot.",
     "intensity": 1,
     "tags": ["drink"]
   },
   {
     "id": "forfeit-008",
-    "text": "Talk in rhymes for the next 2 minutes.",
-    "intensity": 1,
-    "tags": ["funny"]
-  },
-  {
-    "id": "forfeit-009",
-    "text": "Give a 15-second toast to the groom.",
+    "text": "Personen der svarede skal mime noget, dommeren finder på.",
     "intensity": 1,
     "tags": ["performance"]
   },
   {
-    "id": "forfeit-010",
-    "text": "The team must swap seats/positions with another team for one round.",
+    "id": "forfeit-009",
+    "text": "Personen der svarede må ikke snakke igen indtil næste runde.",
     "intensity": 1,
-    "tags": ["group"]
+    "tags": ["funny"]
+  },
+  {
+    "id": "forfeit-010",
+    "text": "Vis det sidste billede, I har på jeres kamerarulle.",
+    "intensity": 2,
+    "tags": ["funny"]
   },
   {
     "id": "forfeit-011",
-    "text": "One team member must do their best dragon roar.",
+    "text": "Personen der svarede må ikke bevæge sig igen indtil næste runde.",
     "intensity": 1,
     "tags": ["funny"]
   },
   {
     "id": "forfeit-012",
-    "text": "The team must invent and perform a two-line team battle cry.",
-    "intensity": 2,
-    "tags": ["performance", "group"]
-  },
-  {
-    "id": "forfeit-013",
-    "text": "One team member must balance a full cup on their head for 30 seconds.",
-    "intensity": 2,
-    "tags": ["physical", "funny"]
-  },
-  {
-    "id": "forfeit-014",
-    "text": "The team must answer in whispers only until their next turn.",
+    "text": "Hold en fuldstændig spontan, opdigtet og overdrevet skål for Patrick.",
     "intensity": 1,
-    "tags": ["funny"]
-  },
-  {
-    "id": "forfeit-015",
-    "text": "One team member must tell an embarrassing story about themselves (30 seconds).",
-    "intensity": 2,
     "tags": ["performance"]
   },
   {
-    "id": "forfeit-016",
-    "text": "The team must do a synchronized victory dance move, on command, for the rest of the game.",
+    "id": "forfeit-013",
+    "text": "Du skal afslutte hver sætning med \"no homo\" i de næste 3 runder, uanset hvor forkert det lyder — hver gang du ikke gør det, skal du drikke.",
     "intensity": 2,
-    "tags": ["performance", "group"]
+    "tags": ["funny", "drink"]
   },
   {
-    "id": "forfeit-017",
-    "text": "One team member must speak only in questions until their next turn.",
-    "intensity": 1,
-    "tags": ["funny"]
-  },
-  {
-    "id": "forfeit-018",
-    "text": "The team must give a round of applause to the team currently in last place.",
-    "intensity": 1,
-    "tags": ["group"]
-  },
-  {
-    "id": "forfeit-019",
-    "text": "One team member must attempt to juggle two objects for 15 seconds.",
+    "id": "forfeit-014",
+    "text": "Et holdmedlem laver 20 armbøjninger.",
     "intensity": 2,
-    "tags": ["physical", "funny"]
+    "tags": ["physical"]
   },
   {
-    "id": "forfeit-020",
-    "text": "The team must come up with a nickname for the groom and use it for the rest of the game.",
-    "intensity": 1,
-    "tags": ["funny", "group"]
-  },
-  {
-    "id": "forfeit-021",
-    "text": "One team member must do their best knight's bow to every other team.",
-    "intensity": 1,
-    "tags": ["funny"]
-  },
-  {
-    "id": "forfeit-022",
-    "text": "The team must hold a 10-second dramatic gasp pose.",
-    "intensity": 1,
-    "tags": ["performance", "funny"]
+    "id": "forfeit-015",
+    "text": "Et holdmedlem shotgunner en øl.",
+    "intensity": 2,
+    "tags": ["drink", "physical"]
   }
 ]

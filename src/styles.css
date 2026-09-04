@@ -61,8 +61,6 @@ html {
   --c-mystery-dark: color-mix(in srgb, var(--c-mystery) 65%, black);
   --c-elite-light: color-mix(in srgb, var(--c-elite) 55%, white);
   --c-elite-dark: color-mix(in srgb, var(--c-elite) 65%, black);
-  --c-boss-light: color-mix(in srgb, var(--c-boss) 55%, white);
-  --c-boss-dark: color-mix(in srgb, var(--c-boss) 65%, black);
   --c-start-light: color-mix(in srgb, var(--c-start) 55%, white);
   --c-start-dark: color-mix(in srgb, var(--c-start) 65%, black);
 }
@@ -520,8 +518,8 @@ h2 {
 
 .node-circle {
   /* stroke-width comes from the radius-proportional inline attribute in
-     MapView.tsx, not a flat value here - otherwise it'd look thin on the
-     boss node and thick on start instead of scaling with size. */
+     MapView.tsx, not a flat value here - otherwise it'd look uneven across
+     node sizes instead of scaling with radius. */
   stroke: var(--glyph-ink);
   filter: drop-shadow(0 4px 6px rgba(40, 28, 10, 0.35)) drop-shadow(0 1.5px 2px rgba(40, 28, 10, 0.3));
 }
@@ -566,11 +564,6 @@ h2 {
 }
 .node-ELITE {
   fill: url(#grad-elite);
-}
-.node-FINAL_BOSS {
-  fill: url(#grad-boss);
-  stroke: var(--gold-ink);
-  stroke-width: 4;
 }
 
 .node-icon-plate {
@@ -726,27 +719,6 @@ h2 {
   }
 }
 
-.node-boss-aura {
-  fill: none;
-  stroke: var(--c-boss);
-  stroke-width: 6;
-  opacity: 0.55;
-  animation: boss-aura 2.4s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes boss-aura {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.96);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.08);
-  }
-}
-
 .team-token {
   transition: transform 0.6s ease;
 }
@@ -818,22 +790,6 @@ h2 {
   font-size: 0.8rem;
 }
 
-.node-select-panel.boss-turn .node-select-prompt {
-  border-color: var(--c-boss);
-  color: var(--gold);
-  animation: boss-turn-glow 1.6s ease-in-out infinite;
-}
-
-@keyframes boss-turn-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 rgba(138, 20, 20, 0);
-  }
-  50% {
-    box-shadow: 0 0 22px rgba(138, 20, 20, 0.65);
-  }
-}
-
 .node-choices {
   display: flex;
   gap: 0.9rem;
@@ -882,9 +838,6 @@ h2 {
 .node-choice-ELITE {
   border-color: var(--c-elite);
 }
-.node-choice-FINAL_BOSS {
-  border-color: var(--c-boss);
-}
 
 .node-choice-icon {
   width: 2.52rem;
@@ -913,9 +866,6 @@ h2 {
 }
 .node-choice-icon-ELITE {
   fill: var(--c-elite);
-}
-.node-choice-icon-FINAL_BOSS {
-  fill: var(--c-boss);
 }
 
 .node-choice-value {
@@ -1200,6 +1150,80 @@ h2 {
   border-radius: 6px;
 }
 
+.overlay-media-frame {
+  padding: 6px;
+  background: #0c0d14;
+  border: 1px solid var(--panel-edge);
+  border-radius: 10px;
+}
+
+.overlay-audio {
+  display: block;
+  width: 100%;
+}
+
+.overlay-video {
+  display: block;
+  width: 100%;
+  max-height: 40vh;
+  border-radius: 6px;
+}
+
+.overlay-clip-hint {
+  margin: 0.4rem 0 0;
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+  font-style: italic;
+  text-align: center;
+}
+
+.overlay-youtube-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.overlay-youtube-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Permanent gradient cover over the title/channel row YouTube can show on
+   hover or pause - a guaranteed visual block regardless of what YouTube's
+   own embed chrome does, since the URL params alone can't fully suppress
+   it (see QuestionOverlay.tsx). pointer-events:none so play/pause/seek
+   controls underneath still work normally. */
+.overlay-youtube-titleguard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 18%;
+  min-height: 42px;
+  background: linear-gradient(180deg, rgba(12, 13, 20, 0.97) 55%, rgba(12, 13, 20, 0));
+  pointer-events: none;
+}
+
+.final-round-prompt {
+  margin: 0.4rem 0 0;
+  color: var(--ink-dim);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.final-round-team-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
 .overlay-choices {
   margin: 0;
   padding-left: 1.2rem;
@@ -1470,6 +1494,47 @@ h2 {
   }
   50% {
     opacity: 1;
+  }
+}
+
+/* Results-screen-only celebratory burst (Confetti.tsx) - not used anywhere
+   else in the game. Sits above the background glow but below the actual
+   result content in paint order, and pointer-events:none so it never
+   blocks the "Nyt Spil" button underneath. Each piece falls and fades once
+   (no loop), so it settles rather than animating forever on a screen the
+   GM may leave open for a while. */
+.confetti-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  border-radius: 1px;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.35, 0, 0.65, 1);
+  animation-fill-mode: forwards;
+}
+
+.confetti-piece.confetti-round {
+  border-radius: 50%;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(var(--confetti-spin, 540deg));
+    opacity: 0;
   }
 }
 

@@ -1,528 +1,466 @@
 [
   {
-    "id": "lotr-001",
-    "category": "Lord of the Rings",
-    "difficulty": 3,
-    "type": "text",
-    "question": "Who is the father of Boromir and Faramir?",
-    "answer": "Denethor II",
-    "explanation": "Denethor is the Steward of Gondor.",
-    "tags": ["lotr", "characters"]
-  },
-  {
-    "id": "lotr-002",
-    "category": "Lord of the Rings",
+    "id": "amerika-n1-01",
+    "category": "Amerika",
     "difficulty": 2,
     "type": "text",
-    "question": "What is the name of Frodo's sword?",
-    "answer": "Sting",
-    "tags": ["lotr", "items"]
+    "question": "Hvilken by i USA er infamøs for at have en del af Patricks familie boende?",
+    "answer": "Toledo, Ohio",
+    "tags": ["usa", "patrick"]
   },
   {
-    "id": "lotr-003",
-    "category": "Lord of the Rings",
-    "difficulty": 5,
-    "type": "text",
-    "question": "What is the name of the sword that is reforged from the shards of Narsil?",
-    "answer": "Andúril",
-    "explanation": "Also known as Flame of the West, reforged for Aragorn.",
-    "tags": ["lotr", "items"]
-  },
-  {
-    "id": "lotr-004",
-    "category": "Lord of the Rings",
-    "difficulty": 4,
-    "type": "text",
-    "question": "What is the name of Sauron's fortress in Mordor?",
-    "answer": "Barad-dûr",
-    "tags": ["lotr", "locations"]
-  },
-  {
-    "id": "lotr-005",
-    "category": "Lord of the Rings",
-    "difficulty": 3,
-    "type": "multiple-choice",
-    "question": "Which race is Legolas?",
-    "choices": ["Elf", "Dwarf", "Hobbit", "Man"],
-    "answer": "Elf",
-    "tags": ["lotr", "characters"]
-  },
-  {
-    "id": "lotr-006",
-    "category": "Lord of the Rings",
-    "difficulty": 1,
-    "type": "text",
-    "question": "What is the name of Frodo's home in the Shire?",
-    "answer": "Bag End",
-    "tags": ["lotr", "locations"]
-  },
-  {
-    "id": "dnd-001",
-    "category": "D&D",
+    "id": "amerika-n1-02",
+    "category": "Amerika",
     "difficulty": 2,
     "type": "text",
-    "question": "How many sides does a typical D&D damage die (the iconic one) have?",
-    "answer": "20 (the d20)",
-    "tags": ["dnd", "5e"]
+    "question": "Hvilket år blev USA's uafhængighedserklæring underskrevet?",
+    "answer": "1776",
+    "tags": ["usa", "historie"]
   },
   {
-    "id": "dnd-002",
-    "category": "D&D",
+    "id": "amerika-n2-01",
+    "category": "Amerika",
     "difficulty": 3,
-    "type": "multiple-choice",
-    "question": "Which ability score governs a spellcaster's Constitution saving throw for concentration?",
-    "choices": ["Constitution", "Wisdom", "Charisma", "Intelligence"],
-    "answer": "Constitution",
-    "tags": ["dnd", "5e", "rules"]
+    "type": "text",
+    "question": "Hvem er afbilledet på den amerikanske 10-dollarseddel, selvom han aldrig var præsident?",
+    "answer": "Alexander Hamilton",
+    "tags": ["usa", "historie"]
   },
   {
-    "id": "dnd-003",
-    "category": "D&D",
+    "id": "amerika-n2-02",
+    "category": "Amerika",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvilken amerikansk delstat var sin egen selvstændige republik, før den blev en del af USA, og har stadig kun én stjerne på sit flag?",
+    "answer": "Texas",
+    "tags": ["usa", "historie"]
+  },
+  {
+    "id": "amerika-n3-01",
+    "category": "Amerika",
     "difficulty": 4,
     "type": "text",
-    "question": "What is the name of the plane of existence where devils reside in most D&D cosmology?",
-    "answer": "The Nine Hells (Baator)",
-    "tags": ["dnd", "lore"]
+    "question": "Hvilket forfatningstillæg (amendment) til den amerikanske forfatning afskaffede formelt slaveriet?",
+    "answer": "Det 13. tillæg (13th Amendment)",
+    "tags": ["usa", "historie"]
   },
   {
-    "id": "dnd-004",
-    "category": "D&D",
+    "id": "amerika-n3-02",
+    "category": "Amerika",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvor mange døde i terrorangrebet mod USA d. 11. september 2001? (+-50)",
+    "answer": "2996",
+    "tags": ["usa", "historie"]
+  },
+  {
+    "id": "amerika-n4-01",
+    "category": "Amerika",
     "difficulty": 5,
     "type": "text",
-    "question": "In 5th Edition, what is the maximum number of 9th-level spell slots a single-classed Wizard can have at level 20?",
-    "answer": "1",
-    "tags": ["dnd", "5e", "rules"]
+    "question": "Hvad hed New York City oprindeligt, da det var en hollandsk koloni?",
+    "answer": "New Amsterdam",
+    "tags": ["usa", "historie"]
   },
   {
-    "id": "dnd-005",
-    "category": "D&D",
-    "difficulty": 1,
+    "id": "amerika-n4-02",
+    "category": "Amerika",
+    "difficulty": 5,
     "type": "text",
-    "question": "What does 'DM' stand for in D&D?",
-    "answer": "Dungeon Master",
+    "question": "Badwater Basin — det laveste punkt i Nordamerika — ligger i hvilken amerikansk delstat?",
+    "answer": "Californien (i Death Valley)",
+    "tags": ["usa", "geografi"]
+  },
+  {
+    "id": "amerika-spicy-01",
+    "category": "Amerika",
+    "difficulty": 3,
+    "type": "image",
+    "question": "Hvilken amerikansk stat er dette?",
+    "image": "images/questions/amerika-spicy-01.jpg",
+    "answer": "Arkansas",
+    "tags": ["usa", "spicy"]
+  },
+  {
+    "id": "amerika-spicy-02",
+    "category": "Amerika",
+    "difficulty": 3,
+    "type": "image",
+    "question": "Hvem spillede til denne Super Bowl-halftime-optræden, og hvilket nummer var det?",
+    "image": "images/questions/amerika-spicy-02.jpg",
+    "answer": "Kendrick Lamar, Super Bowl LIX (59)",
+    "tags": ["usa", "spicy"]
+  },
+  {
+    "id": "jylland-n1-01",
+    "category": "Jylland x Louise",
+    "difficulty": 2,
+    "type": "text",
+    "question": "Hvad er Danmarks højeste naturlige punkt, beliggende i Østjylland nær Skanderborg, med en højde på ca. 171 meter?",
+    "answer": "Møllehøj",
+    "tags": ["danmark", "geografi"]
+  },
+  {
+    "id": "jylland-n1-02",
+    "category": "Jylland x Louise",
+    "difficulty": 2,
+    "type": "text",
+    "question": "Hvilken by i Jylland er Louise oprindeligt fra?",
+    "answer": "Ikast",
+    "tags": ["louise"]
+  },
+  {
+    "id": "jylland-n2-01",
+    "category": "Jylland x Louise",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvad er Patricks og Louises yndlingsdyr?",
+    "answer": "Myresluger",
+    "tags": ["patrick", "louise"]
+  },
+  {
+    "id": "jylland-n2-02",
+    "category": "Jylland x Louise",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvad havde Patrick på, første gang han mødte Louise?",
+    "answer": "Dansk landsholdstrøje",
+    "tags": ["patrick", "louise"]
+  },
+  {
+    "id": "jylland-n3-01",
+    "category": "Jylland x Louise",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvad hedder Danmarks længste og mest befærdede motorvej?",
+    "answer": "E45 (Den Jyske Motorvej)",
+    "tags": ["danmark", "geografi"]
+  },
+  {
+    "id": "jylland-n3-02",
+    "category": "Jylland x Louise",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvor lang tid tager det ca. at komme fra København til Patrick og Louises bryllupsvenue med offentlig transport?",
+    "answer": "4 timer (thanks mate)",
+    "tags": ["patrick", "louise"]
+  },
+  {
+    "id": "jylland-n4-01",
+    "category": "Jylland x Louise",
+    "difficulty": 5,
+    "type": "text",
+    "question": "Hvem var Danmarks første konge, og hvornår blev han konge? (ifølge den officielle kongerække — +-20 år)",
+    "answer": "Gorm den Gamle — 936",
+    "tags": ["danmark", "historie"]
+  },
+  {
+    "id": "jylland-n4-02",
+    "category": "Jylland x Louise",
+    "difficulty": 5,
+    "type": "text",
+    "question": "Hvad er det længste, man kan komme fra kysten i Danmark? (+- 5km)",
+    "answer": "52km",
+    "tags": ["danmark", "geografi"]
+  },
+  {
+    "id": "jylland-spicy-01",
+    "category": "Jylland x Louise",
+    "difficulty": 3,
+    "type": "video",
+    "question": "Hvad prøver han at sige her?",
+    "media": "video/questions/jylland-spicy-01.mp4",
+    "clipStart": 1,
+    "clipEnd": 4,
+    "answer": "Bedre politi",
+    "tags": ["jylland", "spicy"]
+  },
+  {
+    "id": "jylland-spicy-02",
+    "category": "Jylland x Louise",
+    "difficulty": 3,
+    "type": "image",
+    "question": "Hvor meget koster dette hus?",
+    "image": "images/questions/jylland-spicy-02.jpg",
+    "answer": "1.650.000 kr.",
+    "tags": ["jylland", "spicy"]
+  },
+  {
+    "id": "noerdelort-n1-01",
+    "category": "Nørde-lort",
+    "difficulty": 2,
+    "type": "text",
+    "question": "Hvilken videospilserie har superkrigeren \"Master Chief\" som hovedperson?",
+    "answer": "Halo",
+    "tags": ["gaming"]
+  },
+  {
+    "id": "noerdelort-n1-02",
+    "category": "Nørde-lort",
+    "difficulty": 2,
+    "type": "text",
+    "question": "I D&D — nævn alle seks grundlæggende egenskabsværdier (ability scores), en karakter har.",
+    "answer": "Strength (styrke), Dexterity (behændighed), Constitution (udholdenhed), Intelligence (intelligens), Wisdom (visdom), Charisma (karisma)",
     "tags": ["dnd"]
   },
   {
-    "id": "prog-001",
-    "category": "programming",
+    "id": "noerdelort-n2-01",
+    "category": "Nørde-lort",
     "difficulty": 3,
     "type": "text",
-    "question": "What does 'HTML' stand for?",
-    "answer": "HyperText Markup Language",
-    "tags": ["python", "web"]
+    "question": "Hvad er den mest brugte Linux-distribution i verden?",
+    "answer": "Ubuntu",
+    "tags": ["tech"]
   },
   {
-    "id": "prog-002",
-    "category": "programming",
+    "id": "noerdelort-n2-02",
+    "category": "Nørde-lort",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvor mange ringe er der i Ringenes Herre, og hvem havde dem?",
+    "answer": "20 — 3 til elverne, 7 til dværgene, 9 til menneskerne og 1 til Sauron",
+    "tags": ["lotr"]
+  },
+  {
+    "id": "noerdelort-n3-01",
+    "category": "Nørde-lort",
     "difficulty": 4,
     "type": "text",
-    "question": "In Big-O notation, what is the average time complexity of quicksort?",
-    "answer": "O(n log n)",
-    "tags": ["algorithms"]
+    "question": "Hvad hed sværdet, Isildur brugte til at skære Ringen af Saurons hånd — senere omsmedet til Andúril?",
+    "answer": "Narsil",
+    "tags": ["lotr"]
   },
   {
-    "id": "prog-003",
-    "category": "programming",
-    "difficulty": 2,
-    "type": "multiple-choice",
-    "question": "Which of these is not a JavaScript primitive type?",
-    "choices": ["Array", "Boolean", "Number", "String"],
-    "answer": "Array",
-    "tags": ["javascript"]
+    "id": "noerdelort-n3-02",
+    "category": "Nørde-lort",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvilket år udkom den første iPhone?",
+    "answer": "2007",
+    "tags": ["tech"]
   },
   {
-    "id": "prog-004",
-    "category": "programming",
+    "id": "noerdelort-n4-01",
+    "category": "Nørde-lort",
     "difficulty": 5,
     "type": "text",
-    "question": "What CPU scheduling anomaly is named after the person who first described it, where increasing the number of page frames can increase the number of page faults?",
-    "answer": "Bélády's anomaly",
-    "tags": ["systems"]
+    "question": "Hvorfor hedder det en \"bug\", når man finder en fejl i et computerprogram?",
+    "answer": "Fordi der var et insekt i en af de første computere, der fik den til at opføre sig forkert",
+    "tags": ["tech"]
   },
   {
-    "id": "prog-005",
-    "category": "programming",
-    "difficulty": 3,
+    "id": "noerdelort-n4-02",
+    "category": "Nørde-lort",
+    "difficulty": 5,
     "type": "text",
-    "question": "What does 'git rebase' do, in one sentence?",
-    "answer": "It replays a branch's commits on top of another base commit, producing a linear history.",
-    "tags": ["git"]
+    "question": "Hvad er navnet på Ross' anden kone i \"Friends\"?",
+    "answer": "Emily",
+    "tags": ["tv"]
   },
   {
-    "id": "vg-001",
-    "category": "video games",
+    "id": "noerdelort-spicy-01",
+    "category": "Nørde-lort",
+    "difficulty": 3,
+    "type": "video",
+    "question": "Hvilken dungeon er dette legendariske klip fra i WoW?",
+    "media": "video/questions/noerdelort-spicy-01.mp4",
+    "answer": "Upper Blackrock Spire",
+    "tags": ["gaming", "spicy"]
+  },
+  {
+    "id": "noerdelort-spicy-02",
+    "category": "Nørde-lort",
+    "difficulty": 3,
+    "type": "video",
+    "question": "Hvad siger han bagefter?",
+    "media": "video/questions/noerdelort-spicy-02.mp4",
+    "clipStart": 0,
+    "clipEnd": 1,
+    "answer": "You can tell that it's an aspen tree, because the way it is",
+    "tags": ["meme", "spicy"]
+  },
+  {
+    "id": "patrick-n1-01",
+    "category": "Patrick Lore",
     "difficulty": 2,
-    "type": "multiple-choice",
-    "question": "Which company developed Hollow Knight?",
-    "choices": ["Team Cherry", "Supergiant Games", "FromSoftware", "Larian Studios"],
-    "answer": "Team Cherry",
-    "tags": ["gaming", "nintendo"]
+    "type": "text",
+    "question": "Hvad er Patricks mellemnavn?",
+    "answer": "Robert",
+    "tags": ["patrick"]
   },
   {
-    "id": "vg-002",
-    "category": "video games",
+    "id": "patrick-n1-02",
+    "category": "Patrick Lore",
+    "difficulty": 2,
+    "type": "text",
+    "question": "Hvad er Patricks stjernetegn?",
+    "answer": "Løve",
+    "tags": ["patrick"]
+  },
+  {
+    "id": "patrick-n2-01",
+    "category": "Patrick Lore",
     "difficulty": 3,
     "type": "text",
-    "question": "In Slay the Spire, what is the name of the class that starts with the Bash card?",
-    "answer": "The Ironclad",
+    "question": "Hvem var Patricks første kæreste?",
+    "answer": "Katrine",
+    "tags": ["patrick"]
+  },
+  {
+    "id": "patrick-n2-02",
+    "category": "Patrick Lore",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvilken dyregruppe er ikke et dyr (ifølge Patrick)?",
+    "answer": "Fisk",
+    "tags": ["patrick"]
+  },
+  {
+    "id": "patrick-n3-01",
+    "category": "Patrick Lore",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvor mange timer har Patrick i The Binding of Isaac: Rebirth? (+-30)",
+    "answer": "360 timer",
+    "tags": ["patrick", "gaming"]
+  },
+  {
+    "id": "patrick-n3-02",
+    "category": "Patrick Lore",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Nævn alle sportsgrene, Patrick har gået til.",
+    "answer": "Tennis, bordtennis, fodbold, basketball",
+    "tags": ["patrick"]
+  },
+  {
+    "id": "patrick-n4-01",
+    "category": "Patrick Lore",
+    "difficulty": 5,
+    "type": "text",
+    "question": "I hvor lang tid har Patrick kendt Victor?",
+    "answer": "23 år",
+    "tags": ["patrick", "victor"]
+  },
+  {
+    "id": "patrick-n4-02",
+    "category": "Patrick Lore",
+    "difficulty": 5,
+    "type": "text",
+    "question": "Hvor mange steder har Patrick boet?",
+    "answer": "11",
+    "tags": ["patrick"]
+  },
+  {
+    "id": "patrick-spicy-01",
+    "category": "Patrick Lore",
+    "difficulty": 3,
+    "type": "image",
+    "question": "Hvor gamle var vi her?",
+    "image": "images/questions/patrick-spicy-01.jpg",
+    "answer": "5",
+    "tags": ["patrick", "spicy"]
+  },
+  {
+    "id": "patrick-spicy-02",
+    "category": "Patrick Lore",
+    "difficulty": 3,
+    "type": "image",
+    "question": "Hvad er Christians kommentar til dette billede?",
+    "image": "images/questions/patrick-spicy-02.jpg",
+    "answer": "\"Du ligner en delfin\"",
+    "tags": ["patrick", "spicy"]
+  },
+  {
+    "id": "noerdelort2-n1-01",
+    "category": "Nørde-lort Vol. 2",
+    "difficulty": 2,
+    "type": "text",
+    "question": "Hvad er det korrekte videnskabelige udtryk for en virus, der specifikt inficerer og formerer sig i bakterier?",
+    "answer": "En bakteriofag",
+    "tags": ["science"]
+  },
+  {
+    "id": "noerdelort2-n1-02",
+    "category": "Nørde-lort Vol. 2",
+    "difficulty": 2,
+    "type": "text",
+    "question": "I \"The Hitchhiker's Guide to the Galaxy\" — hvilket tal viser sig at være svaret på det ultimative spørgsmål om livet, universet og alting?",
+    "answer": "42",
+    "tags": ["bøger"]
+  },
+  {
+    "id": "noerdelort2-n2-01",
+    "category": "Nørde-lort Vol. 2",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvilket organel bliver ofte kaldt \"cellens kraftværk\"?",
+    "answer": "Mitokondrien",
+    "tags": ["science"]
+  },
+  {
+    "id": "noerdelort2-n2-02",
+    "category": "Nørde-lort Vol. 2",
+    "difficulty": 3,
+    "type": "text",
+    "question": "Hvornår blev Danmark en del af Det Europæiske Økonomiske Fællesskab, forløberen for EU?",
+    "answer": "1973",
+    "tags": ["danmark", "historie"]
+  },
+  {
+    "id": "noerdelort2-n3-01",
+    "category": "Nørde-lort Vol. 2",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvornår døde Søren Kierkegaard?",
+    "answer": "1855",
+    "tags": ["danmark", "historie"]
+  },
+  {
+    "id": "noerdelort2-n3-02",
+    "category": "Nørde-lort Vol. 2",
+    "difficulty": 4,
+    "type": "text",
+    "question": "Hvad hedder Skyrims første Shout, \"Fus Ro Dah\", officielt (på engelsk)?",
+    "answer": "Unrelenting Force",
     "tags": ["gaming"]
   },
   {
-    "id": "vg-003",
-    "category": "video games",
-    "difficulty": 4,
-    "type": "image",
-    "question": "What game is this pixel-art title screen from?",
-    "image": "images/questions/vg-003.svg",
-    "answer": "Celeste",
-    "tags": ["gaming"]
-  },
-  {
-    "id": "vg-004",
-    "category": "video games",
-    "difficulty": 3,
-    "type": "image",
-    "question": "This icon represents a classic power-up. Which game franchise is it from?",
-    "image": "images/questions/vg-004.svg",
-    "answer": "Super Mario",
-    "tags": ["gaming", "nintendo"]
-  },
-  {
-    "id": "vg-005",
-    "category": "video games",
+    "id": "noerdelort2-n4-01",
+    "category": "Nørde-lort Vol. 2",
     "difficulty": 5,
     "type": "text",
-    "question": "What is the name of the final boss of Dark Souls (2011)?",
-    "answer": "Gwyn, Lord of Cinder",
-    "tags": ["gaming"]
+    "question": "Hvad er det højeste level, en spillerkarakter kan nå i D&D 4e?",
+    "answer": "30",
+    "tags": ["dnd"]
   },
   {
-    "id": "vg-006",
-    "category": "video games",
-    "difficulty": 1,
-    "type": "text",
-    "question": "What color is Sonic the Hedgehog?",
-    "answer": "Blue",
-    "tags": ["gaming"]
-  },
-  {
-    "id": "sci-001",
-    "category": "science",
-    "difficulty": 2,
-    "type": "text",
-    "question": "What planet is known as the Red Planet?",
-    "answer": "Mars",
-    "tags": ["physics", "space"]
-  },
-  {
-    "id": "sci-002",
-    "category": "science",
-    "difficulty": 3,
-    "type": "text",
-    "question": "What is the chemical symbol for gold?",
-    "answer": "Au",
-    "tags": ["chemistry"]
-  },
-  {
-    "id": "sci-003",
-    "category": "science",
-    "difficulty": 4,
-    "type": "text",
-    "question": "What particle is exchanged between nucleons to mediate the strong nuclear force?",
-    "answer": "The pion (or, more fundamentally, the gluon)",
-    "tags": ["physics"]
-  },
-  {
-    "id": "sci-004",
-    "category": "science",
-    "difficulty": 3,
-    "type": "multiple-choice",
-    "question": "Which gas makes up the largest percentage of Earth's atmosphere?",
-    "choices": ["Nitrogen", "Oxygen", "Carbon dioxide", "Argon"],
-    "answer": "Nitrogen",
-    "tags": ["chemistry"]
-  },
-  {
-    "id": "sci-005",
-    "category": "science",
+    "id": "noerdelort2-n4-02",
+    "category": "Nørde-lort Vol. 2",
     "difficulty": 5,
     "type": "text",
-    "question": "What is the name of the theoretical boundary around a black hole beyond which nothing can escape?",
-    "answer": "The event horizon",
-    "tags": ["physics", "space"]
+    "question": "I \"How I Met Your Mother\" — hvilken farve har paraplyen, der går igen gennem hele \"hvordan de mødtes\"-historien som et tilbagevendende symbol?",
+    "answer": "Gul",
+    "tags": ["tv"]
   },
   {
-    "id": "tech-001",
-    "category": "technology",
-    "difficulty": 2,
-    "type": "text",
-    "question": "What does 'CPU' stand for?",
-    "answer": "Central Processing Unit",
-    "tags": ["hardware"]
-  },
-  {
-    "id": "tech-002",
-    "category": "technology",
+    "id": "noerdelort2-spicy-01",
+    "category": "Nørde-lort Vol. 2",
     "difficulty": 3,
-    "type": "text",
-    "question": "What company originally developed the Java programming language?",
-    "answer": "Sun Microsystems",
-    "tags": ["software"]
+    "type": "audio",
+    "question": "Hvornår er denne sang fra, hvad hedder den, og hvem har lavet den?",
+    "media": "audio/questions/noerdelort2-spicy-01.mp3",
+    "answer": "1987, \"Never Gonna Give You Up\" af Rick Astley",
+    "tags": ["meme", "spicy"]
   },
   {
-    "id": "tech-003",
-    "category": "technology",
-    "difficulty": 4,
-    "type": "text",
-    "question": "What does 'RAID' stand for in storage systems?",
-    "answer": "Redundant Array of Independent (or Inexpensive) Disks",
-    "tags": ["hardware"]
-  },
-  {
-    "id": "tech-004",
-    "category": "technology",
-    "difficulty": 1,
-    "type": "text",
-    "question": "What does 'Wi-Fi' let devices connect to without cables?",
-    "answer": "A wireless local network / the internet",
-    "tags": ["networking"]
-  },
-  {
-    "id": "groom-001",
-    "category": "groom",
+    "id": "noerdelort2-spicy-02",
+    "category": "Nørde-lort Vol. 2",
     "difficulty": 3,
-    "type": "text",
-    "question": "[Placeholder] What was the groom's first job?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["groom"]
-  },
-  {
-    "id": "groom-002",
-    "category": "groom",
-    "difficulty": 2,
-    "type": "text",
-    "question": "[Placeholder] What is the groom's go-to karaoke song?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["groom"]
-  },
-  {
-    "id": "groom-003",
-    "category": "groom",
-    "difficulty": 4,
-    "type": "text",
-    "question": "[Placeholder] What was the groom's most embarrassing moment in university?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["groom", "university"]
-  },
-  {
-    "id": "groom-004",
-    "category": "groom",
-    "difficulty": 1,
-    "type": "text",
-    "question": "[Placeholder] What is the groom's favorite food?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["groom"]
-  },
-  {
-    "id": "gb-001",
-    "category": "groom + bride",
-    "difficulty": 3,
-    "type": "text",
-    "question": "[Placeholder] Where did the groom and bride first meet?",
-    "answer": "[Replace with the real answer, e.g. 'At the DTU summer party in 2022']",
-    "tags": ["groom", "bride"]
-  },
-  {
-    "id": "gb-002",
-    "category": "groom + bride",
-    "difficulty": 2,
-    "type": "text",
-    "question": "[Placeholder] What was the couple's first date?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["groom", "bride"]
-  },
-  {
-    "id": "gb-003",
-    "category": "groom + bride",
-    "difficulty": 5,
-    "type": "text",
-    "question": "[Placeholder] What did the groom say when he proposed?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["groom", "bride"]
-  },
-  {
-    "id": "friends-001",
-    "category": "friends",
-    "difficulty": 3,
-    "type": "text",
-    "question": "[Placeholder] Which friend group member is most likely to be late?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["friend-group"]
-  },
-  {
-    "id": "friends-002",
-    "category": "friends",
-    "difficulty": 2,
-    "type": "text",
-    "question": "[Placeholder] What is the group's most-used inside joke?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["friend-group"]
-  },
-  {
-    "id": "friends-003",
-    "category": "friends",
-    "difficulty": 4,
-    "type": "text",
-    "question": "[Placeholder] Who in the group has the most embarrassing travel story?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["friend-group"]
-  },
-  {
-    "id": "uni-001",
-    "category": "university",
-    "difficulty": 3,
-    "type": "text",
-    "question": "[Placeholder] What was the name of the group's favorite university bar/hangout?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["university"]
-  },
-  {
-    "id": "uni-002",
-    "category": "university",
-    "difficulty": 2,
-    "type": "text",
-    "question": "[Placeholder] What course did most of the friend group take together?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["university"]
-  },
-  {
-    "id": "uni-003",
-    "category": "university",
-    "difficulty": 5,
-    "type": "text",
-    "question": "[Placeholder] What was the group's lowest collective exam grade, and in what course?",
-    "answer": "[Replace with the real answer before the event]",
-    "tags": ["university"]
-  },
-  {
-    "id": "trivia-001",
-    "category": "general trivia",
-    "difficulty": 1,
-    "type": "text",
-    "question": "How many continents are there on Earth?",
-    "answer": "Seven",
-    "tags": []
-  },
-  {
-    "id": "trivia-002",
-    "category": "general trivia",
-    "difficulty": 2,
-    "type": "multiple-choice",
-    "question": "What is the capital of Denmark?",
-    "choices": ["Copenhagen", "Oslo", "Stockholm", "Helsinki"],
-    "answer": "Copenhagen",
-    "tags": []
-  },
-  {
-    "id": "trivia-003",
-    "category": "general trivia",
-    "difficulty": 3,
-    "type": "text",
-    "question": "Which ocean is the largest by surface area?",
-    "answer": "The Pacific Ocean",
-    "tags": []
-  },
-  {
-    "id": "trivia-004",
-    "category": "general trivia",
-    "difficulty": 4,
-    "type": "text",
-    "question": "In which year did the Berlin Wall fall?",
-    "answer": "1989",
-    "tags": []
-  },
-  {
-    "id": "trivia-005",
-    "category": "general trivia",
-    "difficulty": 5,
-    "type": "text",
-    "question": "What is the only mammal capable of true, sustained flight?",
-    "answer": "The bat",
-    "tags": []
-  },
-  {
-    "id": "trivia-006",
-    "category": "general trivia",
-    "difficulty": 3,
-    "type": "image",
-    "question": "What country's flag is this?",
-    "image": "images/questions/trivia-006.svg",
-    "answer": "Japan",
-    "tags": []
-  },
-  {
-    "id": "trivia-007",
-    "category": "general trivia",
-    "difficulty": 1,
-    "type": "text",
-    "question": "How many days are there in a leap year?",
-    "answer": "366",
-    "tags": []
-  },
-  {
-    "id": "sci-006",
-    "category": "science",
-    "difficulty": 1,
-    "type": "text",
-    "question": "What force pulls objects toward the Earth?",
-    "answer": "Gravity",
-    "tags": ["physics"]
-  },
-  {
-    "id": "vg-007",
-    "category": "video games",
-    "difficulty": 2,
-    "type": "text",
-    "question": "What is the name of the princess Mario usually rescues?",
-    "answer": "Princess Peach",
-    "tags": ["gaming", "nintendo"]
-  },
-  {
-    "id": "prog-006",
-    "category": "programming",
-    "difficulty": 1,
-    "type": "text",
-    "question": "What symbol is commonly used to start a comment in Python?",
-    "answer": "#",
-    "tags": ["python"]
-  },
-  {
-    "id": "dnd-006",
-    "category": "D&D",
-    "difficulty": 3,
-    "type": "image",
-    "question": "What alignment is commonly represented by this classic D&D symbol pairing (Law/Chaos vs Good/Evil)?",
-    "image": "images/questions/dnd-006.svg",
-    "answer": "Any answer describing the 3x3 alignment grid (e.g. Lawful Good) is acceptable",
-    "tags": ["dnd", "5e"]
-  },
-  {
-    "id": "lotr-007",
-    "category": "Lord of the Rings",
-    "difficulty": 3,
-    "type": "text",
-    "question": "What is the name of Gandalf's horse?",
-    "answer": "Shadowfax",
-    "tags": ["lotr", "characters"]
-  },
-  {
-    "id": "tech-005",
-    "category": "technology",
-    "difficulty": 3,
-    "type": "multiple-choice",
-    "question": "Which of these is a version control system?",
-    "choices": ["Git", "Photoshop", "Excel", "Figma"],
-    "answer": "Git",
-    "tags": ["software"]
+    "type": "youtube",
+    "question": "Hvilket sprog er det dubbet til, og hvor mange gange har det været oversat?",
+    "youtubeId": "ep98a0mDiIc",
+    "answer": "Japansk, 0 gange",
+    "tags": ["film", "spicy"]
   }
 ]

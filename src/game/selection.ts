@@ -1,11 +1,16 @@
-import type { EncounterType, Question } from '../types';
+import type { EncounterType, Question, QuestionType } from '../types';
 import { ENCOUNTER_DIFFICULTY } from './config';
+
+// Every non-text/multiple-choice question type - what a "spicy" question
+// counts as for MYSTERY's preference below. Update this if a new media
+// type is ever added (CONTENT_GUIDE.md §2).
+const MEDIA_TYPES: QuestionType[] = ['image', 'audio', 'video', 'youtube'];
 
 /**
  * TECHNICAL_SPEC.md §6 question selection algorithm:
  * 1. unused only
  * 2. drop the previous category for this team (unless that empties the pool)
- * 3. MYSTERY prefers `image` questions when available
+ * 3. MYSTERY prefers media questions (image/audio/video/youtube) when available
  * 4. exact difficulty match, else nearest difficulty, else any remaining
  * 5. random pick among the resulting eligible pool
  */
@@ -35,8 +40,10 @@ export function selectQuestion(
 
   let finalPool = byDifficulty;
   if (encounterType === 'MYSTERY') {
-    const imagePool = byDifficulty.filter((q) => q.type === 'image');
-    if (imagePool.length > 0) finalPool = imagePool;
+    // "Spicy" media questions are the modern form of MYSTERY's original
+    // image-preference (CONTENT_GUIDE.md §2).
+    const mediaPool = byDifficulty.filter((q) => MEDIA_TYPES.includes(q.type));
+    if (mediaPool.length > 0) finalPool = mediaPool;
   }
 
   const index = Math.floor(Math.random() * finalPool.length);

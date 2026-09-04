@@ -6,7 +6,7 @@ interface Props {
   map: GameState['map'];
 }
 
-const LEGEND_TYPES: EncounterType[] = ['TREASURE', 'BATTLE', 'PUZZLE', 'MYSTERY', 'ELITE', 'FINAL_BOSS'];
+const LEGEND_TYPES: EncounterType[] = ['TREASURE', 'BATTLE', 'PUZZLE', 'MYSTERY', 'ELITE'];
 
 // GAME_DESIGN.md §15: a corner-anchored, always-visible key so the icon-only
 // node glyphs stay readable without needing a label (or its point value)

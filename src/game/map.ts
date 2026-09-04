@@ -93,7 +93,6 @@ export function buildMap(config: GameConfig): Record<string, MapNode> {
     const size = LAYER_SIZES[layer - 1];
     layerIds.push(Array.from({ length: size }, (_, i) => nodeId(layer, i)));
   }
-  layerIds.push(['boss']);
 
   map.start = {
     id: 'start',
@@ -132,8 +131,11 @@ export function buildMap(config: GameConfig): Record<string, MapNode> {
       const encounterType = TYPE_CYCLE[(index + layerShift) % TYPE_CYCLE.length];
       const lane = lanes[index];
 
+      // Layer 9 is the end of every team's path - the final boss is now a
+      // shared round posed after all teams finish (see manager.ts), not a
+      // map node, so layer 9 nodes are simply terminal (no connections).
       const connections = isLastNormalLayer
-        ? ['boss']
+        ? []
         : connectionsByLane[lane].map((targetLane) => nextIds[nextLanes!.indexOf(targetLane)]);
 
       // Small jitter within this lane's own slot for organic variety - never
@@ -143,9 +145,9 @@ export function buildMap(config: GameConfig): Record<string, MapNode> {
       // the convergence check in validateMap depends on).
       const baseX = laneX(lane);
       const xSlack = (0.5 / LANE_COUNT) * 0.35;
-      // Layer 9 climbs toward the boss at the top of the screen (y near 0);
-      // start sits at the bottom (y = 1). See map.start/map.boss below.
-      const baseY = 1 - layer / 10;
+      // Layer 9 climbs to the top of the screen (y = 0); start sits at the
+      // bottom (y = 1).
+      const baseY = 1 - layer / 9;
 
       map[id] = {
         id,
@@ -159,26 +161,13 @@ export function buildMap(config: GameConfig): Record<string, MapNode> {
     });
   }
 
-  map.boss = {
-    id: 'boss',
-    layer: 10,
-    encounterType: 'FINAL_BOSS',
-    value: encounterValue(config, 'FINAL_BOSS'),
-    connections: [],
-    x: 0.5,
-    // Pushed above y=0 (rather than sitting exactly at the same spacing as
-    // every other layer gap) so it isn't cramped against layer 9 - MapView's
-    // PAD_Y_TOP was widened to match, giving this the room it needs above
-    // the canvas's own top edge.
-    y: -0.05,
-  };
-
   return map;
 }
 
 /**
  * TECHNICAL_SPEC.md §11: validate that all nodes have valid forward
- * connections and that the boss is reachable from every possible path.
+ * connections and that every layer-9 node (the end of every path) is
+ * reachable.
  */
 export function validateMap(map: Record<string, MapNode>): void {
   const errors: string[] = [];
@@ -189,10 +178,12 @@ export function validateMap(map: Record<string, MapNode>): void {
         errors.push(`Node ${node.id} connects to unknown node ${target}`);
       }
     }
-    if (node.id !== 'boss' && node.connections.length === 0) {
+    // Layer 9 nodes are the terminal end of every path (see buildMap) - a
+    // dead end there is expected, not an error.
+    if (node.layer !== 9 && node.connections.length === 0) {
       errors.push(`Node ${node.id} has no forward connections (dead end)`);
     }
-    if (node.id !== 'start' && node.id !== 'boss' && node.connections.length > 3) {
+    if (node.id !== 'start' && node.connections.length > 3) {
       errors.push(`Node ${node.id} has more than 3 forward connections`);
     }
   }
@@ -211,7 +202,6 @@ export function validateMap(map: Record<string, MapNode>): void {
   for (const id of Object.keys(map)) {
     if (!visited.has(id)) errors.push(`Node ${id} is unreachable from start`);
   }
-  if (!visited.has('boss')) errors.push('Boss node is not reachable from start');
 
   if (errors.length > 0) {
     throw new Error(`Map validation failed:\n${errors.join('\n')}`);

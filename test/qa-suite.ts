@@ -27,11 +27,15 @@ function section(title: string): void {
 
 // Drives a full game deterministically. `pickCorrect(team, encounterNum)`
 // decides correct/incorrect for each encounter; `pickNodeIndex` picks which
-// available node index to choose (default: always the first).
+// available node index to choose (default: always the first). Once every
+// team has finished its normal encounters, the manager enters the shared
+// FINAL_ROUND phase (GAME_DESIGN.md §14) - this drives that to completion
+// too, picking `pickWinnerIndex` as the closest team.
 function playFullGame(
   teamNames: string[],
   pickCorrect: (teamIndex: number, encounterNum: number) => boolean,
-  pickNodeIndex: (available: string[], teamIndex: number, encounterNum: number) => number = () => 0
+  pickNodeIndex: (available: string[], teamIndex: number, encounterNum: number) => number = () => 0,
+  pickWinnerIndex: (teamCount: number) => number = () => 0
 ): GameManager {
   const manager = new GameManager(teamNames);
   manager.startGame();
@@ -39,10 +43,19 @@ function playFullGame(
   let guard = 0;
   while (!manager.isGameOver()) {
     guard++;
-    if (guard > teamNames.length * 10 + 5) {
+    if (guard > teamNames.length * 9 + 5) {
       throw new Error('playFullGame exceeded expected turn count - possible infinite loop.');
     }
     const state = manager.getState();
+
+    if (state.gamePhase === 'FINAL_ROUND') {
+      manager.revealFinalAnswer();
+      const winnerTeam = manager.getState().teams[pickWinnerIndex(manager.getState().teams.length)];
+      manager.resolveFinalRound(winnerTeam.id);
+      manager.finishGame();
+      continue;
+    }
+
     const teamIndex = state.currentTeamIndex;
     const encounterNum = state.teams[teamIndex].encountersCompleted + 1;
 
@@ -84,31 +97,25 @@ section('MAP TOPOLOGY INVARIANTS');
 
   const layer9Nodes = Object.values(map).filter((n) => n.layer === 9);
   check('there are layer-9 nodes', layer9Nodes.length > 0);
-  const allConvergeOnBoss = layer9Nodes.every(
-    (n) => n.connections.length === 1 && n.connections[0] === 'boss'
-  );
+  const allTerminal = layer9Nodes.every((n) => n.connections.length === 0);
   check(
-    'every layer-9 node connects only to the single "boss" end node (branches converge)',
-    allConvergeOnBoss,
+    'every layer-9 node is terminal (no outgoing connections) - the final boss is a shared round, not a map node',
+    allTerminal,
     `layer9 -> ${JSON.stringify(layer9Nodes.map((n) => n.connections))}`
   );
-
-  const boss = map['boss'];
-  check('boss node exists, is layer 10, type FINAL_BOSS, value 1000',
-    boss.layer === 10 && boss.encounterType === 'FINAL_BOSS' && boss.value === 1000);
-  check('boss has no outgoing connections (terminal node)', boss.connections.length === 0);
+  check("map has no 'boss' node", map['boss'] === undefined);
 
   let allEdgesGoForward = true;
   let edgeCounts1to3 = true;
   for (const node of Object.values(map)) {
-    if (node.id === 'boss') continue;
+    if (node.layer === 9) continue; // terminal, expected 0 connections (checked above)
     if (node.connections.length < 1 || node.connections.length > 3) edgeCounts1to3 = false;
     for (const targetId of node.connections) {
       const target = map[targetId];
       if (!target || target.layer !== node.layer + 1) allEdgesGoForward = false;
     }
   }
-  check('every non-boss node has 1-3 forward connections', edgeCounts1to3);
+  check('every non-terminal node has 1-3 forward connections', edgeCounts1to3);
   check('every connection points to a node exactly one layer ahead', allEdgesGoForward);
 
   // Convergence rule: a node shares at most one forward connection with an
@@ -143,24 +150,23 @@ for (const teamCount of [3, 4]) {
 
   check(`[${teamCount}-team] game reaches GAME_END`, state.gamePhase === 'GAME_END');
   check(
-    `[${teamCount}-team] every team completed exactly 10 encounters`,
-    state.teams.every((t) => t.encountersCompleted === 10)
+    `[${teamCount}-team] every team completed exactly 9 encounters`,
+    state.teams.every((t) => t.encountersCompleted === 9)
   );
   check(
-    `[${teamCount}-team] turnHistory has teamCount*10 records`,
-    state.turnHistory.length === teamCount * 10
+    `[${teamCount}-team] turnHistory has teamCount*9 + 1 records (one shared final-round record)`,
+    state.turnHistory.length === teamCount * 9 + 1
   );
   check(
-    `[${teamCount}-team] every team ends at the boss node`,
-    state.teams.every((t) => t.position === 'boss')
+    `[${teamCount}-team] every team ends at a layer-9 node`,
+    state.teams.every((t) => state.map[t.position]?.layer === 9)
   );
+  const finalBossRecords = state.turnHistory.filter((r) => r.encounterType === 'FINAL_BOSS');
   check(
-    `[${teamCount}-team] every team has exactly one FINAL_BOSS record, and it is their 10th`,
-    state.teams.every((team) => {
-      const records = state.turnHistory.filter((r) => r.teamId === team.id);
-      const bossRecords = records.filter((r) => r.encounterType === 'FINAL_BOSS');
-      return bossRecords.length === 1 && records[9]?.encounterType === 'FINAL_BOSS';
-    })
+    `[${teamCount}-team] exactly one shared FINAL_BOSS record exists, worth +bossValue for the winner only`,
+    finalBossRecords.length === 1 &&
+      finalBossRecords[0].scoreChange === DEFAULT_CONFIG.bossValue &&
+      finalBossRecords[0].isCorrect === true
   );
   check(
     `[${teamCount}-team] all questions used are unique`,
@@ -190,14 +196,14 @@ section('DIFFERENT MAP PATHS (many randomized playthroughs, stress test)');
     );
     const state = manager.getState();
     if (state.gamePhase !== 'GAME_END') allOk = false;
-    if (!state.teams.every((t) => t.encountersCompleted === 10 && t.position === 'boss')) allOk = false;
+    if (!state.teams.every((t) => t.encountersCompleted === 9 && state.map[t.position]?.layer === 9)) allOk = false;
+    if (state.turnHistory.filter((r) => r.encounterType === 'FINAL_BOSS').length !== 1) allOk = false;
     for (const team of state.teams) {
-      const path = state.turnHistory.filter((r) => r.teamId === team.id).map((r) => r.nodeId).join('>');
+      const path = state.turnHistory
+        .filter((r) => r.teamId === team.id && r.encounterType !== 'FINAL_BOSS')
+        .map((r) => r.nodeId)
+        .join('>');
       distinctPathSignatures.add(path);
-      const bossIdx = state.turnHistory
-        .filter((r) => r.teamId === team.id)
-        .findIndex((r) => r.encounterType === 'FINAL_BOSS');
-      if (bossIdx !== 9) allOk = false;
     }
   }
   check(`${RUNS} randomized 4-team games all complete correctly`, allOk);
@@ -221,8 +227,10 @@ section('SCORING: SYMMETRY, POSITIVE, NEGATIVE, WINNER CALCULATION');
   check('all-correct run: every scoreChange is positive', recordsP.every((r) => r.scoreChange > 0));
   check('all-correct run: final score is positive and matches sum of changes', teamP.score === expectedPositive && teamP.score > 0);
 
-  // All-incorrect team -> strictly negative final score.
-  const allIncorrect = playFullGame(['X', 'Y', 'Z'], () => false);
+  // All-incorrect team -> strictly negative final score. The shared final
+  // round is steered to a different team (index 1, not X) so X's records
+  // stay purely negative for the check below.
+  const allIncorrect = playFullGame(['X', 'Y', 'Z'], () => false, undefined, () => 1);
   const stateAI = allIncorrect.getState();
   const teamX = stateAI.teams.find((t) => t.name === 'X')!;
   const recordsX = stateAI.turnHistory.filter((r) => r.teamId === teamX.id);
@@ -242,20 +250,26 @@ section('SCORING: SYMMETRY, POSITIVE, NEGATIVE, WINNER CALCULATION');
     const st = m.getState();
     const map = st.map;
     for (const r of st.turnHistory) {
+      // The shared final-round record isn't tied to a map node and isn't
+      // symmetric (winner-only +bossValue, GAME_DESIGN.md §14) - checked
+      // separately below instead.
+      if (r.encounterType === 'FINAL_BOSS') continue;
       const node = map[r.nodeId];
       const expected = r.isCorrect ? node.value : -node.value;
       if (r.scoreChange !== expected) symmetryOk = false;
       if (!r.isCorrect && !r.forfeitId) forfeitAlwaysOnIncorrect = false;
       if (r.isCorrect && r.forfeitId) neverForfeitOnCorrect = false;
     }
+    const finalRecord = st.turnHistory.find((r) => r.encounterType === 'FINAL_BOSS');
+    if (!finalRecord || finalRecord.scoreChange !== DEFAULT_CONFIG.bossValue) symmetryOk = false;
     for (const team of st.teams) {
-      if (team.encountersCompleted !== 10) alwaysProgresses = false;
+      if (team.encountersCompleted !== 9) alwaysProgresses = false;
     }
   }
-  check('symmetric scoring holds across many games (correct=+value, incorrect=-value, matches map node value)', symmetryOk);
+  check('symmetric scoring holds across many games (correct=+value, incorrect=-value, matches map node value; final round is winner-only +bossValue)', symmetryOk);
   check('every incorrect answer produced a forfeit', forfeitAlwaysOnIncorrect);
   check('no correct answer ever produced a forfeit', neverForfeitOnCorrect);
-  check('every team always reached exactly 10 encounters regardless of outcome mix (always progresses)', alwaysProgresses);
+  check('every team always reached exactly 9 encounters regardless of outcome mix (always progresses)', alwaysProgresses);
 
   // Winner calculation / leaderboard sort.
   const lb = allCorrect.getLeaderboard();
@@ -279,6 +293,14 @@ section('TIES');
   while (!manager.isGameOver()) {
     turn++;
     const state = manager.getState();
+    if (state.gamePhase === 'FINAL_ROUND') {
+      // Not part of the tie itself (winner-only, per-team-untouched) - just
+      // drive it to completion so the game can reach GAME_END.
+      manager.revealFinalAnswer();
+      manager.resolveFinalRound(state.teams[0].id);
+      manager.finishGame();
+      continue;
+    }
     const teamIndex = state.currentTeamIndex;
     const available = manager.getAvailableNodes();
     manager.selectNode(available[0]); // always the first option, for every team
@@ -290,16 +312,22 @@ section('TIES');
   }
   const state = manager.getState();
   const [a, b, c] = ['Tie-A', 'Tie-B', 'Tie-C'].map((n) => state.teams.find((t) => t.name === n)!);
+  // Normal-encounter score only (excludes the shared final-round record,
+  // which was deliberately steered to team A above and so is expected to
+  // break the raw tie by design - GAME_DESIGN.md §14 winner-only scoring).
+  const normalScore = (teamId: string) =>
+    state.turnHistory
+      .filter((r) => r.teamId === teamId && r.encounterType !== 'FINAL_BOSS')
+      .reduce((sum, r) => sum + r.scoreChange, 0);
   check(
-    'three teams with identical paths + identical correctness produce identical scores',
-    a.score === b.score && b.score === c.score,
-    `A=${a.score} B=${b.score} C=${c.score}`
+    'three teams with identical paths + identical correctness produce identical normal-encounter scores',
+    normalScore(a.id) === normalScore(b.id) && normalScore(b.id) === normalScore(c.id),
+    `A=${normalScore(a.id)} B=${normalScore(b.id)} C=${normalScore(c.id)}`
   );
-
-  const lb = manager.getLeaderboard();
-  const topScore = lb[0].score;
-  const winners = lb.filter((t) => t.score === topScore);
-  check('tie is reflected in the leaderboard (all 3 teams share the top score)', winners.length === 3);
+  check(
+    "the final round's winner-only bonus is exactly the difference between A's final score and the tied normal score",
+    a.score === normalScore(a.id) + DEFAULT_CONFIG.bossValue && b.score === normalScore(b.id) && c.score === normalScore(c.id)
+  );
 }
 
 // ---------------------------------------------------------------------------

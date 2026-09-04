@@ -21,10 +21,25 @@ function simulateGame(): boolean {
     turnCount++;
     state = game.getState();
 
+    if (state.gamePhase === 'FINAL_ROUND') {
+      console.log(`\n--- TURN ${turnCount}: SHARED FINAL ROUND ---`);
+      console.log(`Question [${state.finalRoundQuestion?.category}]: ${state.finalRoundQuestion?.question}`);
+      game.revealFinalAnswer();
+      state = game.getState();
+      console.log(`Canonical answer: ${state.finalRoundQuestion?.answer}`);
+      const winner = state.teams[Math.floor(Math.random() * state.teams.length)];
+      game.resolveFinalRound(winner.id);
+      state = game.getState();
+      console.log(`Closest team: ${winner.icon} ${winner.name} | +${state.finalRoundResult?.scoreChange}`);
+      game.finishGame();
+      if (turnCount > 60) throw new Error('Game stuck in a loop - safety exit.');
+      continue;
+    }
+
     const currentTeam = state.teams[state.currentTeamIndex];
     const encounterNum = currentTeam.encountersCompleted + 1;
 
-    console.log(`\n--- TURN ${turnCount}: ${currentTeam.name} (Encounter ${encounterNum}/10) ---`);
+    console.log(`\n--- TURN ${turnCount}: ${currentTeam.name} (Encounter ${encounterNum}/9) ---`);
     console.log(`Position: ${currentTeam.position} | Score: ${currentTeam.score}`);
 
     const availableNodes = game.getAvailableNodes();
@@ -117,18 +132,16 @@ function simulateGame(): boolean {
     return violations;
   });
 
-  const bossRecordsCorrectValue = state.turnHistory
-    .filter((r) => r.encounterType === 'FINAL_BOSS')
-    .every((r) => Math.abs(r.scoreChange) === 1000);
+  const finalBossRecords = state.turnHistory.filter((r) => r.encounterType === 'FINAL_BOSS');
+  const bossRecordCorrectValue = finalBossRecords.every((r) => r.scoreChange === 1000 && r.isCorrect === true);
 
   const checks: [string, boolean][] = [
-    ['All teams completed 10 encounters', state.teams.every((t) => t.encountersCompleted === 10)],
-    ['Game has 40 turn records (4 teams x 10)', state.turnHistory.length === 40],
+    ['All teams completed 9 encounters', state.teams.every((t) => t.encountersCompleted === 9)],
+    ['Game has 37 turn records (4 teams x 9 + 1 shared final round)', state.turnHistory.length === 37],
     ['All questions used are unique', new Set(state.turnHistory.map((t) => t.questionId)).size === state.turnHistory.length],
-    ['Each team reached the boss node', state.teams.every((t) => t.position === 'boss')],
-    ['Every team has exactly one FINAL_BOSS encounter', state.teams.every((team) =>
-      state.turnHistory.filter((r) => r.teamId === team.id && r.encounterType === 'FINAL_BOSS').length === 1)],
-    ['Boss encounters are worth +/-1000', bossRecordsCorrectValue],
+    ['Each team ended at a layer-9 node', state.teams.every((t) => state.map[t.position]?.layer === 9)],
+    ['Exactly one shared FINAL_BOSS record exists (the final round is shared, not per-team)', finalBossRecords.length === 1],
+    ['The final round is worth +1000, winner-only (no penalty for other teams)', bossRecordCorrectValue],
     ['No back-to-back repeated categories per team', categoryRepeatViolations.length === 0],
     ['Negative scores are supported (at least one occurred or all-correct run)', true],
     ['Game phase is GAME_END', state.gamePhase === 'GAME_END'],

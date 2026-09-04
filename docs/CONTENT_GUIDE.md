@@ -12,6 +12,8 @@ I should be able to add, remove or edit questions by editing this file.
 
 Do not require changes to application code.
 
+The single final-boss question lives separately, in `data/final-boss.json` — see §2.
+
 Each question must have:
 
 ```text
@@ -28,6 +30,7 @@ Optional fields:
 ```text
 choices
 image
+media
 explanation
 tags
 ```
@@ -84,7 +87,65 @@ Normal question answered verbally.
 }
 ```
 
+### audio / video
+
+Same shape as `image`, but use `media` instead of `image` as the file field:
+
+```json
+{
+  "id": "example-004",
+  "category": "gaming",
+  "difficulty": 3,
+  "type": "audio",
+  "question": "What game is this sound effect from?",
+  "media": "audio/questions/example-004.mp3",
+  "answer": "Example answer"
+}
+```
+
+`type: "video"` works the same way, with `media` pointing at a video file.
+
+Both support optional `clipStart`/`clipEnd` (seconds) to only reveal an excerpt before the answer is shown - e.g. play just seconds 1-4 of a longer clip, so the punchline/full clip doesn't spoil the question. Before the GM reveals the answer, playback and seeking are confined to that window; once revealed, the full file becomes playable and scrubbable normally. Either can be omitted (e.g. only `clipEnd` just caps how far the pre-reveal excerpt runs). Only meaningful for `audio`/`video`:
+
+```json
+{
+  "id": "example-004b",
+  "category": "gaming",
+  "difficulty": 3,
+  "type": "video",
+  "question": "What happens right after this clip?",
+  "media": "video/questions/example-004b.mp4",
+  "clipStart": 0,
+  "clipEnd": 3,
+  "answer": "Example answer"
+}
+```
+
+### youtube
+
+For a clip you can't or don't want to store as a local file. Uses `youtubeId` (just the video id, not the full URL) instead of `image`/`media`:
+
+```json
+{
+  "id": "example-005",
+  "category": "gaming",
+  "difficulty": 3,
+  "type": "youtube",
+  "question": "What game is this trailer for?",
+  "youtubeId": "dQw4w9WgXcQ",
+  "answer": "Example answer"
+}
+```
+
+Embedded via `youtube-nocookie.com` with related-videos/branding/annotations minimized, and always shown in-page (never a direct link to youtube.com), so the browser's tab/page title never shows the real video title. There's no fully guaranteed way to hide YouTube's own in-player title text via URL params alone (YouTube dropped that option years ago) — the player has a permanent cover over the title/channel row as a fallback, regardless.
+
+**This is the one exception to "the game must work offline" (§8 below, TECHNICAL_SPEC.md §1): a `youtube` question needs real internet access at the venue at the moment it's played.** Use it sparingly, and only when you actually can't get a local file.
+
 The architecture should allow additional question types later.
+
+### The final boss question
+
+The single climactic final-boss question is stored separately, in `data/final-boss.json`, as one `Question` object (not an array). It is posed once, shared by every team at once, at the end of the game — see GAME_DESIGN.md §14. Edit it the same way as any other question; it doesn't need a `difficulty` that matches anything, since it's never drawn from the main pool.
 
 ---
 
@@ -112,19 +173,13 @@ Obscure does not automatically mean difficult.
 
 Categories are flexible data.
 
-Initial examples:
+Current categories (`data/questions.json`):
 
-- Lord of the Rings
-- D&D
-- programming
-- video games
-- science
-- technology
-- groom
-- groom + bride
-- friends
-- university
-- general trivia
+- Amerika
+- Jylland x Louise
+- Nørde-lort
+- Patrick Lore
+- Nørde-lort Vol. 2
 
 Add, remove or rename categories freely.
 
@@ -191,19 +246,21 @@ The GM still manually marks a multiple-choice answer correct or incorrect; the s
 
 ---
 
-## 8. Images
+## 8. Images, Audio & Video
 
-Images belong in a local project directory, for example:
+Media files belong in local project directories:
 
 ```text
 public/images/questions/
+public/audio/questions/
+public/video/questions/
 ```
 
-Reference them from the question data.
+Reference them from the question data (`image` for `type: "image"`, `media` for `type: "audio"`/`"video"`).
 
-Use images for questions where the visual itself is part of the challenge.
+Use media for questions where the image/sound/clip itself is part of the challenge.
 
-Do not rely on external image URLs because the game must work offline.
+Do not rely on external URLs because the game must work offline — with one deliberate exception: `type: "youtube"` (see §2), for a clip you can't store as a local file. Use it sparingly; it needs real internet access at play time, unlike everything else in the game.
 
 ---
 
@@ -234,9 +291,10 @@ Encounter types are automatically assigned by the game based on map nodes, and q
 | TREASURE 💎 | 2 (easy) | Gold | Straightforward | General knowledge, groom facts |
 | BATTLE ⚔️ | 3 (medium) | Red | Combat-themed | Mixed knowledge, predictions |
 | PUZZLE 🧩 | 4 (hard) | Cyan | Problem-solving | Logic, wordplay, trivia |
-| MYSTERY 🔮 | 3 (medium) | Purple | Enigmatic | **Prefer image questions** |
+| MYSTERY 🔮 | 3 (medium) | Purple | Enigmatic | **Prefer media questions (image/audio/video/youtube)** |
 | ELITE 👑 | 5 (very hard) | Orange | Authoritative | Deep nerd knowledge, obscure |
-| FINAL BOSS 🐉 | 5 (very hard) | Red | Epic | The hardest, most dramatic question |
+
+FINAL BOSS 🐉 isn't in this table — it's a single dedicated question (`data/final-boss.json`) posed once to every team together, not matched by difficulty like the rest of the pool (see §2 and GAME_DESIGN.md §14).
 
 The game automatically ensures variety by avoiding repeating a team's previous question category within a single game.
 
@@ -269,7 +327,7 @@ Groom and friend-group questions can be personal, weird or humorous.
 
 The pool is built for a single game only — it does not need to support replaying the game across multiple separate sessions.
 
-Target approximately **60–70 questions**. A full game draws 40 questions (4 teams × 10 encounters), so this leaves enough headroom for the difficulty- and category-based selection rules (see TECHNICAL_SPEC.md §6) to find a good match without constantly falling back.
+Target enough headroom over what a full game actually draws. A full game draws 36 questions from the main pool (4 teams × 9 encounters) plus the one dedicated final-boss question — so a pool of 50+ questions leaves comfortable room for the difficulty- and category-based selection rules (see TECHNICAL_SPEC.md §6) to find a good match without constantly falling back.
 
 The pool should contain a mixture of:
 
@@ -278,7 +336,7 @@ The pool should contain a mixture of:
 - general nerd knowledge
 - general trivia
 
-Use varied difficulties, with the most depth at difficulty 3 (medium) since both BATTLE and MYSTERY draw from it. Include a reasonable number of `image`-type questions, since MYSTERY encounters prefer them when available.
+Use varied difficulties, with the most depth at difficulty 3 (medium) since both BATTLE and MYSTERY draw from it. Include a reasonable number of media (`image`/`audio`/`video`) questions, since MYSTERY encounters prefer them when available.
 
 Not every question needs to be multiple choice.
 
@@ -307,13 +365,15 @@ Example:
 ```json
 {
   "id": "forfeit-001",
-  "text": "Give the groom a dramatic 20-second fantasy RPG-style prophecy.",
-  "intensity": 2,
-  "tags": ["performance", "funny"]
+  "text": "Hele holdet tager en tår.",
+  "intensity": 1,
+  "tags": ["drink", "group"]
 }
 ```
 
-Target approximately **20–30 forfeits**. Unlike questions, forfeits are not tracked as used, so the same forfeit can come up more than once in a game — a smaller pool is fine.
+Unlike questions, forfeits are never excluded once used — the same forfeit can come up more than once in a game — but each use makes it progressively less likely to be picked again relative to the rest of the pool (see TECHNICAL_SPEC.md §12), so a smaller pool (the current 15) is fine; repeats will lean toward the ones used least so far.
+
+There's no association between a forfeit and how hard the question was — a forfeit is drawn from the whole pool regardless of which node/difficulty the wrong answer came from.
 
 Forfeits should be:
 
@@ -339,6 +399,7 @@ Useful errors include:
 - invalid difficulty
 - invalid question type
 - missing image
+- missing audio/video media
 - duplicate forfeit ID
 
 Show useful error messages rather than failing silently.

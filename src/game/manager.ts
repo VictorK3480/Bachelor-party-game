@@ -6,7 +6,7 @@ import type {
   Team,
   TurnRecord,
 } from '../types';
-import { DEFAULT_CONFIG, TEAM_ICONS } from './config';
+import { DEFAULT_CONFIG, TEAM_ICONS, encounterValue } from './config';
 import { buildMap, validateMap } from './map';
 import { loadContent } from './content';
 import { selectQuestion } from './selection';
@@ -22,6 +22,8 @@ function cloneState(state: GameState): GameState {
     currentForfeit: state.currentForfeit ? { ...state.currentForfeit } : null,
     lastResolution: state.lastResolution ? { ...state.lastResolution } : null,
     turnHistory: state.turnHistory.map((r) => ({ ...r })),
+    finalRoundResult: state.finalRoundResult ? { ...state.finalRoundResult } : null,
+    forfeitUseCounts: { ...state.forfeitUseCounts },
   };
 }
 
@@ -35,6 +37,7 @@ export class GameManager {
   private config: GameConfig;
   private questionPool: Question[];
   private forfeitPool: Forfeit[];
+  private finalBossQuestion: Question;
   private previousSnapshot: GameState | null = null;
 
   constructor(teamNames: string[], config: GameConfig = DEFAULT_CONFIG) {
@@ -43,12 +46,13 @@ export class GameManager {
     }
     this.config = config;
 
-    const { questions, forfeits, errors } = loadContent();
+    const { questions, forfeits, finalBossQuestion, errors } = loadContent();
     if (errors.length > 0) {
       throw new Error(`Content validation failed:\n${errors.join('\n')}`);
     }
     this.questionPool = questions;
     this.forfeitPool = forfeits;
+    this.finalBossQuestion = finalBossQuestion;
 
     const map = buildMap(config);
     validateMap(map);
@@ -73,11 +77,19 @@ export class GameManager {
       currentForfeit: null,
       lastResolution: null,
       turnHistory: [],
+      finalRoundQuestion: null,
+      isFinalAnswerRevealed: false,
+      finalRoundResult: null,
+      forfeitUseCounts: {},
     };
   }
 
   getState(): GameState {
     return this.state;
+  }
+
+  getConfig(): GameConfig {
+    return this.config;
   }
 
   private get currentTeam(): Team {
@@ -168,7 +180,7 @@ export class GameManager {
     // state is mutated, so a failure here never leaves a half-applied score
     // change with no matching turn record - mirrors the same safe ordering
     // used in selectNode() for question selection.
-    const forfeit = isCorrect ? null : selectForfeit(this.forfeitPool);
+    const forfeit = isCorrect ? null : selectForfeit(this.forfeitPool, this.state.forfeitUseCounts);
 
     this.snapshot();
 
@@ -191,6 +203,7 @@ export class GameManager {
     this.state.currentForfeit = forfeit;
     if (forfeit) {
       record.forfeitId = forfeit.id;
+      this.state.forfeitUseCounts[forfeit.id] = (this.state.forfeitUseCounts[forfeit.id] ?? 0) + 1;
     }
 
     this.state.turnHistory.push(record);
@@ -228,12 +241,82 @@ export class GameManager {
     );
 
     if (allDone) {
-      this.state.gamePhase = 'GAME_END';
+      // GAME_DESIGN.md §14: the final boss is a single shared round, posed
+      // to every team at once, once everyone has finished their normal map
+      // encounters - not a per-team map node.
+      this.state.finalRoundQuestion = this.finalBossQuestion;
+      this.state.isFinalAnswerRevealed = false;
+      this.state.gamePhase = 'FINAL_ROUND';
       return;
     }
 
     this.state.currentTeamIndex = (this.state.currentTeamIndex + 1) % this.state.teams.length;
     this.state.gamePhase = 'NODE_SELECT';
+  }
+
+  revealFinalAnswer(): void {
+    if (this.state.gamePhase !== 'FINAL_ROUND') {
+      throw new Error(`Cannot reveal the final answer during phase ${this.state.gamePhase}.`);
+    }
+    if (this.state.isFinalAnswerRevealed) {
+      throw new Error('The final answer has already been revealed.');
+    }
+    this.snapshot();
+    this.state.isFinalAnswerRevealed = true;
+  }
+
+  /**
+   * Resolves the shared final round: unlike a normal encounter, only the
+   * closest team is scored - GAME_DESIGN.md §14. Everyone else's score is
+   * left untouched (no symmetric penalty for not being closest).
+   */
+  resolveFinalRound(winningTeamId: string): void {
+    if (this.state.gamePhase !== 'FINAL_ROUND' || !this.state.isFinalAnswerRevealed) {
+      throw new Error('Cannot resolve the final round before the answer has been revealed.');
+    }
+    const question = this.state.finalRoundQuestion;
+    if (!question) {
+      throw new Error('No active final round question to resolve.');
+    }
+    const team = this.state.teams.find((t) => t.id === winningTeamId);
+    if (!team) {
+      throw new Error(`Unknown team: ${winningTeamId}`);
+    }
+
+    this.snapshot();
+
+    const scoreChange = encounterValue(this.config, 'FINAL_BOSS');
+    team.score += scoreChange;
+
+    this.state.turnHistory.push({
+      teamId: team.id,
+      teamName: team.name,
+      nodeId: 'final-round',
+      encounterType: 'FINAL_BOSS',
+      questionId: question.id,
+      category: question.category,
+      isCorrect: true,
+      scoreChange,
+      newScore: team.score,
+    });
+
+    this.state.finalRoundResult = { winningTeamId, scoreChange };
+    this.state.gamePhase = 'FINAL_ROUND_RESULT';
+  }
+
+  /**
+   * Advances from the final round's result to GAME_END, mirroring
+   * advanceAfterResult()'s role for normal encounters.
+   */
+  finishGame(): void {
+    if (this.state.gamePhase !== 'FINAL_ROUND_RESULT') {
+      throw new Error(`Cannot finish the game during phase ${this.state.gamePhase}.`);
+    }
+    this.snapshot();
+    this.state.finalRoundQuestion = null;
+    this.state.isFinalAnswerRevealed = false;
+    this.state.finalRoundResult = null;
+    this.state.gamePhase = 'GAME_END';
   }
 
   canUndo(): boolean {

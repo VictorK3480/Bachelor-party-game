@@ -6,8 +6,8 @@ The application runs locally in a browser.
 
 Requirements:
 
-- no internet required during gameplay
-- no external APIs
+- no internet required during gameplay, with one deliberate exception: a `type: "youtube"` question (§4) embeds a YouTube clip and needs real internet access at the moment it's played
+- no external APIs, beyond that same YouTube embed
 - no authentication
 - no backend required
 - no database required for the first version
@@ -126,6 +126,38 @@ Image question:
 }
 ```
 
+Audio/video question (uses `media` instead of `image`):
+
+```json
+{
+  "id": "gaming-003",
+  "category": "Video Games",
+  "difficulty": 3,
+  "type": "audio",
+  "media": "audio/questions/gaming-003.mp3",
+  "question": "What game's theme song is this?",
+  "answer": "Example answer"
+}
+```
+
+YouTube question (uses `youtubeId` — a video id, not a URL — instead of `image`/`media`; needs internet at play time, see §1):
+
+```json
+{
+  "id": "gaming-004",
+  "category": "Video Games",
+  "difficulty": 3,
+  "type": "youtube",
+  "youtubeId": "dQw4w9WgXcQ",
+  "question": "What game is this trailer for?",
+  "answer": "Example answer"
+}
+```
+
+Rendered via `youtube-nocookie.com` with related videos/branding/annotations minimized, always embedded in-page (never a direct link to youtube.com, so the page's own title never gets replaced by the video's), plus a permanent visual cover over the title/channel row as a fallback — YouTube removed the URL parameter that used to hide the in-player title outright, so that's the only fully reliable way to keep it hidden.
+
+The final boss question is stored separately, in `data/final-boss.json`, as a single `Question` object rather than an array — see §6.
+
 The exact schema may be improved if necessary, but it must remain simple to edit manually.
 
 ---
@@ -144,7 +176,7 @@ Renaming a category should not require code changes.
 
 ## 6. Question Selection
 
-Encounter type → difficulty mapping (see GAME_DESIGN.md §6):
+Encounter type → difficulty mapping (see GAME_DESIGN.md §6). This only applies to the 5 normal map encounter types — `FINAL_BOSS` is a separate shared round (§14 in GAME_DESIGN.md) posed from its own dedicated question (`data/final-boss.json`), never difficulty-matched from the pool by this algorithm:
 
 ```text
 TREASURE     → 2 (easy)
@@ -152,7 +184,6 @@ BATTLE       → 3 (medium)
 MYSTERY      → 3 (medium)
 PUZZLE       → 4 (hard)
 ELITE        → 5 (very hard)
-FINAL_BOSS   → 5 (very hard)
 ```
 
 Difficulty 1 (very easy) is not a primary target for any encounter type; it is only used as a fallback.
@@ -162,7 +193,7 @@ When an encounter begins:
 1. Determine the encounter's target difficulty from the mapping above.
 2. Filter out all previously used questions.
 3. Filter out questions sharing a category with the immediately preceding question answered by this team. Skip this filter if it would leave zero eligible questions.
-4. For a MYSTERY encounter, prefer `type: "image"` questions within the remaining pool, if any are eligible.
+4. For a MYSTERY encounter, prefer media questions (`type: "image"`, `"audio"`, `"video"`, or `"youtube"`) within the remaining pool, if any are eligible.
 5. Select from questions matching the target difficulty exactly. If none are eligible, widen to the nearest difficulty (±1, then ±2, ...) before falling back to any remaining eligible question.
 6. Select one question randomly from the resulting eligible pool.
 7. Mark it as used.
@@ -238,6 +269,9 @@ usedQuestionIds
 currentEncounter
 gamePhase
 turnHistory
+finalRoundQuestion      (the shared final-boss question, set once all teams finish the map)
+finalRoundResult        (winning team + score change, once the final round is resolved)
+forfeitUseCounts        (forfeit id -> times used, for weighted forfeit selection, see §12)
 previousStateSnapshot   (for single-step undo, see §10)
 ```
 
@@ -288,16 +322,17 @@ The map must contain:
 
 - START (single node)
 - 9 normal progression layers
-- BOSS
+
+There is no boss node — the final boss (GAME_DESIGN.md §14) is a separate shared round triggered after every team finishes the map, not a map destination.
 
 Topology mimics a Slay the Spire-style branching map:
 
 - START connects forward to all 3 nodes of layer 1. Layer 1 always has exactly 3 nodes.
 - Layers 2–9 each contain 2–3 nodes.
-- Each node connects forward to 1–3 nodes in the next layer.
+- Each node connects forward to 1–3 nodes in the next layer, except layer 9's nodes, which are terminal (no forward connections — a team's path ends there).
 - A node may share at most one of its forward connections with a neighboring node in the same layer, allowing adjacent paths to converge on a shared next-layer node without turning the map into a fully connected mess.
 
-Every valid path contains exactly 9 normal encounters before the boss.
+Every valid path contains exactly 9 normal encounters.
 
 Every node must define:
 
@@ -312,7 +347,7 @@ x, y   (for visual layout)
 
 Multiple teams may occupy the same node at the same time. Rendering must visually distinguish teams sharing a node (e.g. stacked or offset icons) — this is a display concern, not a game-state concern.
 
-The application must validate that all nodes have valid forward connections and that the boss is reachable from every possible path.
+The application must validate that all nodes have valid forward connections and that every layer-9 node is reachable from every possible path.
 
 ---
 
@@ -331,7 +366,7 @@ Example:
 }
 ```
 
-Select forfeits randomly. Do not track forfeits as "used" — the same forfeit can be selected more than once in a game.
+Select forfeits randomly, weighted away from repeats rather than excluding used ones outright: each forfeit's selection weight is `1 / (useCount + 1)`, so one used once is half as likely as a fresh one, one used twice a third as likely, and so on — the same forfeit can still be selected more than once in a game, just with falling odds each time. Track `forfeitUseCounts` (forfeit id → times used) in game state for this, reverted by undo like any other state. This weighting is unrelated to question difficulty/category — the forfeit pool itself has no such association.
 
 Resolution is a single action: the GM clicks a **Forfeit Complete** control once it has been performed, which unblocks turn advancement. The application does not verify that the forfeit was actually performed.
 

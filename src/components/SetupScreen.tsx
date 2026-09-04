@@ -5,7 +5,7 @@ interface Props {
   error: string | null;
 }
 
-const DEFAULT_NAMES = ['Team Red', 'Team Blue', 'Team Green', 'Team Yellow'];
+const DEFAULT_NAMES = ['Hold Rødt', 'Hold Blåt', 'Hold Grønt', 'Hold Gult'];
 // Matches what the game engine actually supports (TEAM_ICONS in config.ts
 // has exactly 4 entries) - not a place to add more options without also
 // wiring up icons/validation for them.
@@ -23,11 +23,11 @@ export default function SetupScreen({ onStart, error }: Props) {
   function handleStart() {
     const activeNames = names.slice(0, teamCount).map((n) => n.trim());
     if (activeNames.some((n) => !n)) {
-      setLocalError('Every team needs a name.');
+      setLocalError('Alle hold skal have et navn.');
       return;
     }
     if (new Set(activeNames).size !== activeNames.length) {
-      setLocalError('Team names must be unique.');
+      setLocalError('Holdnavne skal være unikke.');
       return;
     }
     setLocalError(null);
@@ -50,11 +50,11 @@ export default function SetupScreen({ onStart, error }: Props) {
           ❖
         </span>
 
-        <h1>Bachelor Party Quiz</h1>
-        <p className="subtitle">Set up your teams to begin the adventure.</p>
+        <h1>Patrick Polterabend Quiz</h1>
+        <p className="subtitle">Sæt dine hold op og start eventyret.</p>
 
         <div className="team-count-control">
-          <span className="team-count-label">Number of teams</span>
+          <span className="team-count-label">Antal hold</span>
           <div className="team-count-buttons">
             {TEAM_COUNT_OPTIONS.map((count) => (
               <button
@@ -72,7 +72,7 @@ export default function SetupScreen({ onStart, error }: Props) {
         <div className="team-name-inputs">
           {Array.from({ length: teamCount }, (_, i) => (
             <label key={i} className="team-name-field">
-              Team {i + 1} name
+              Hold {i + 1} navn
               <input value={names[i]} onChange={(e) => updateName(i, e.target.value)} maxLength={24} />
             </label>
           ))}
@@ -81,7 +81,7 @@ export default function SetupScreen({ onStart, error }: Props) {
         {(localError || error) && <p className="error-text">{localError ?? error}</p>}
 
         <button className="setup-start-button" onClick={handleStart}>
-          Start Game
+          Start Spillet
         </button>
       </div>
     </div>

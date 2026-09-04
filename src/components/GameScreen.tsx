@@ -3,6 +3,7 @@ import type { GameManager } from '../game/manager';
 import MapView from './MapView';
 import Scoreboard from './Scoreboard';
 import QuestionOverlay from './QuestionOverlay';
+import FinalRoundOverlay from './FinalRoundOverlay';
 import EncounterGlyph from './EncounterGlyph';
 import { ENCOUNTER_LABEL } from '../game/config';
 
@@ -30,12 +31,11 @@ export default function GameScreen({ manager, onChange }: Props) {
   }
 
   const availableNodes = state.gamePhase === 'NODE_SELECT' ? manager.getAvailableNodes() : [];
-  const isBossTurn = availableNodes.length === 1 && state.map[availableNodes[0]]?.id === 'boss';
 
   return (
     <div className="game-screen">
       <header className="game-header">
-        <h1>Bachelor Party Quiz</h1>
+        <h1>Patrick Polterabend Quiz</h1>
         <div className="header-controls">
           {/* Always rendered (disabled when there's nothing to undo) rather
               than disappearing - undo is last-action-only by design, and a
@@ -45,9 +45,9 @@ export default function GameScreen({ manager, onChange }: Props) {
             className="undo-button"
             disabled={!manager.canUndo()}
             onClick={() => act(() => manager.undo())}
-            title={manager.canUndo() ? 'Undo the last action' : 'Nothing to undo — only the most recent action can be undone'}
+            title={manager.canUndo() ? 'Fortryd sidste handling' : 'Intet at fortryde — kun den seneste handling kan fortrydes'}
           >
-            ↺ Undo
+            ↺ Fortryd
           </button>
         </div>
       </header>
@@ -56,7 +56,7 @@ export default function GameScreen({ manager, onChange }: Props) {
         <div className="action-error-banner">
           <span>{actionError}</span>
           <button className="ghost-button" onClick={() => setActionError(null)}>
-            Dismiss
+            Afvis
           </button>
         </div>
       )}
@@ -65,13 +65,13 @@ export default function GameScreen({ manager, onChange }: Props) {
         <MapView state={state} availableNodeIds={availableNodes} />
 
         {state.gamePhase === 'NODE_SELECT' && (
-          <div className={`node-select-panel ${isBossTurn ? 'boss-turn' : ''}`}>
+          <div className="node-select-panel">
             <p className="node-select-prompt">
               <span className="node-select-team">
                 {currentTeam.icon} {currentTeam.name}
               </span>
-              {isBossTurn ? ' faces the Final Boss!' : "'s turn — choose your path"}
-              <span className="node-select-progress">Encounter {currentTeam.encountersCompleted + 1}/10</span>
+              's tur — vælg din vej
+              <span className="node-select-progress">Udfordring {currentTeam.encountersCompleted + 1}/9</span>
             </p>
             <div className="node-choices">
               {availableNodes.map((nodeId) => {
@@ -105,6 +105,10 @@ export default function GameScreen({ manager, onChange }: Props) {
 
       {(state.gamePhase === 'QUESTION' || state.gamePhase === 'RESULT') && (
         <QuestionOverlay manager={manager} onChange={onChange} />
+      )}
+
+      {(state.gamePhase === 'FINAL_ROUND' || state.gamePhase === 'FINAL_ROUND_RESULT') && (
+        <FinalRoundOverlay manager={manager} onChange={onChange} />
       )}
 
       <Scoreboard state={state} />
