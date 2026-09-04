@@ -365,7 +365,13 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1.25rem;
+  /* Vertical padding scales down on short viewports (vh-driven clamp,
+     matching the root font-size technique above) instead of staying fixed -
+     otherwise this and the scoreboard together eat a disproportionate slice
+     of a small screen's height, squeezing .map-area (flex: 1, so it only
+     gets whatever's left) down to a cramped sliver. Unchanged on tall
+     screens (still caps at 0.6rem, today's value). */
+  padding: clamp(0.3rem, 1vh, 0.6rem) 1.25rem;
   /* Translucent, not opaque - a little of the shared gradient shows through
      even here, which is what keeps this from reading as a solid bar dropped
      on top of a separate panel. Not fully transparent because header height
@@ -754,13 +760,18 @@ h2 {
 
 .node-select-panel {
   position: absolute;
-  bottom: 0.75rem;
+  /* Same vh-driven compaction as the header/scoreboard - this overlay
+     doesn't take layout space from .map-area, but it still visually covers
+     a chunk of the map's own bottom padding, and its rem-sized content
+     doesn't shrink along with the SVG on a small screen the way the map
+     itself does. Unchanged on tall screens (caps at today's values). */
+  bottom: clamp(0.4rem, 1vh, 0.75rem);
   left: 0;
   right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  gap: clamp(0.4rem, 1.2vh, 0.75rem);
   padding: 0 1rem;
 }
 
@@ -772,7 +783,7 @@ h2 {
   background: rgba(12, 13, 20, 0.72);
   border: 1px solid var(--panel-edge);
   border-radius: 999px;
-  padding: 0.45rem 1.1rem;
+  padding: clamp(0.25rem, 0.8vh, 0.45rem) 1.1rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -806,7 +817,7 @@ h2 {
   flex-direction: column;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.7rem 1.1rem;
+  padding: clamp(0.4rem, 1.2vh, 0.7rem) 1.1rem;
   border-radius: 10px;
   background: linear-gradient(160deg, #efe2bd, #d9c9a0);
   border: 2px solid var(--parchment-edge);
@@ -840,12 +851,12 @@ h2 {
 }
 
 .node-choice-icon {
-  width: 2.52rem;
-  height: 2.52rem;
+  width: clamp(1.9rem, 4.4vh, 2.52rem);
+  height: clamp(1.9rem, 4.4vh, 2.52rem);
 }
 
 .node-choice-label {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 2.3vh, 1.2rem);
 }
 
 .node-choice-icon-fill {
@@ -883,7 +894,11 @@ h2 {
   justify-content: space-evenly;
   align-items: center;
   gap: 0.5rem 1rem;
-  padding: 1.5rem 1rem 0.9rem;
+  /* Same vh-driven compaction as .game-header, but this bar's own padding
+     was the biggest offender - its 1.5rem top pad alone was often larger
+     than the entire content row inside it. Unchanged on tall screens
+     (still caps at today's 1.5rem/0.9rem). */
+  padding: clamp(0.5rem, 2vh, 1.5rem) 1rem clamp(0.4rem, 1.2vh, 0.9rem);
   /* Its own local fade rather than a flat tint - the shared .game-screen
      gradient stays parchment all the way down now, so this is what actually
      dissolves the parchment into the dark control bar. A flat translucent
@@ -996,12 +1011,25 @@ h2 {
   padding: 1.75rem 2rem;
   max-width: 640px;
   width: 100%;
-  max-height: 85vh;
+  /* .overlay-backdrop centers this with its own 1.5rem padding on every
+     side - capping against that directly (not just a flat vh number) means
+     this can never nominally request more height than the backdrop's own
+     padding actually leaves, however short the viewport gets. */
+  max-height: min(85vh, calc(100vh - 3rem));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
   animation: overlay-pop-in 0.25s ease;
+}
+
+/* Photo/video/YouTube questions get a much wider, taller box - see
+   QuestionOverlay.tsx's isVisualMedia - so the media is actually readable
+   on a small shared screen instead of being squeezed into the same 640px
+   box used for plain text questions. */
+.question-overlay.overlay-media-large {
+  max-width: min(94vw, 980px);
+  max-height: min(92vh, calc(100vh - 3rem));
 }
 
 .question-overlay.encounter-TREASURE {
@@ -1167,6 +1195,15 @@ h2 {
   width: 100%;
   max-height: 40vh;
   border-radius: 6px;
+  /* Without this, a video whose width-derived height gets clamped by
+     max-height (more likely now that the box can be much wider - see
+     .overlay-media-large) would stretch to fill that box instead of
+     staying at its own aspect ratio. */
+  object-fit: contain;
+}
+
+.overlay-media-large .overlay-video {
+  max-height: 60vh;
 }
 
 .overlay-clip-hint {

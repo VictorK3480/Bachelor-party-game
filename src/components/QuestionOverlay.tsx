@@ -21,6 +21,11 @@ export default function QuestionOverlay({ manager, onChange }: Props) {
 
   const { question } = encounter;
   const isResult = state.gamePhase === 'RESULT';
+  // Visual media (a photo/video/YouTube clip) is the whole point of these
+  // questions - on a small shared screen a 640px box makes it too small to
+  // actually see, so these get a much wider/taller overlay. Audio doesn't
+  // need it (there's no large visual, just a player bar).
+  const isVisualMedia = question.type === 'image' || question.type === 'video' || question.type === 'youtube';
 
   // See GameScreen.tsx's act() for why this needs a try/catch: without it, a
   // thrown action (e.g. an exhausted question pool) silently freezes the
@@ -37,7 +42,7 @@ export default function QuestionOverlay({ manager, onChange }: Props) {
 
   return (
     <div className="overlay-backdrop">
-      <div className={`question-overlay encounter-${encounter.encounterType}`}>
+      <div className={`question-overlay encounter-${encounter.encounterType} ${isVisualMedia ? 'overlay-media-large' : ''}`}>
         <div className="overlay-header">
           <span className="overlay-header-main">
             <span className="overlay-icon">{ENCOUNTER_ICON[encounter.encounterType]}</span>
